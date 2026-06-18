@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+    env_file:
+      - ./Backend/.env
+    environment:
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,[::1],backend"
+      FRONTEND_URL: "http://localhost:5173"
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      SQLITE_NAME: "/data/db.sqlite3"
+      MEDIA_ROOT: "gammes"
+      STATIC_ROOT: "staticfiles"
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_db:/data
+      - backend_media:/app/gammes
+      - backend_static:/app/staticfiles
+
+  frontend:
+    build:
+      context: ./Frontend
+      args:
+        VITE_API_URL: "/"
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    volumes:
+      - backend_media:/media:ro
+
+volumes:
+  backend_db:
+  backend_media:
+  backend_static:

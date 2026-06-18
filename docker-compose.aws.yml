@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    env_file:
+      - ./Backend/.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./Backend
+    env_file:
+      - ./Backend/.env
+    environment:
+      DB_ENGINE: "postgresql"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_SSLMODE: "disable"
+      MEDIA_ROOT: "gammes"
+      STATIC_ROOT: "staticfiles"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - backend_media:/app/gammes
+      - backend_static:/app/staticfiles
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Frontend
+      args:
+        VITE_API_URL: "/"
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:5173:80"
+    volumes:
+      - backend_media:/media:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  backend_media:
+  backend_static:

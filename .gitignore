@@ -1,0 +1,33 @@
+# Secrets
+.env
+*.env
+!*.env.example
+Backend/.env
+
+# Python / Django
+__pycache__/
+*.py[cod]
+.venv/
+Backend/.venv/
+.pytest_cache/
+.coverage
+coverage.xml
+Backend/coverage.xml
+htmlcov/
+Backend/htmlcov/
+Backend/db.sqlite3
+Backend/staticfiles/
+
+# Uploaded/generated files
+Backend/gammes/
+Backend/media/
+
+# Node / frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/coverage/
+
+# Local tooling
+.vscode/
+.idea/
+*.log
