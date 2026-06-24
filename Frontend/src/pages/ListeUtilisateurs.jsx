@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../components/DashboardLayout";
 import { usersAPI } from "../api/index";
@@ -8,6 +8,7 @@ import { usersAPI } from "../api/index";
 const ListeUtilisateurs = () => {
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [confirmModal, setConfirmModal] = useState({
     open: false,
@@ -15,8 +16,17 @@ const ListeUtilisateurs = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    if (location.state?.warning) {
+      setNotice({ type: "warning", message: location.state.warning });
+      window.history.replaceState({}, document.title);
+    } else if (location.state?.success) {
+      setNotice({ type: "success", message: location.state.success });
+      window.history.replaceState({}, document.title);
+    }
+
     const fetchUtilisateurs = async () => {
       try {
         const data = await usersAPI.list();
@@ -29,7 +39,7 @@ const ListeUtilisateurs = () => {
     };
 
     fetchUtilisateurs();
-  }, []);
+  }, [location.state]);
 
   const groupAffectations = (affectations = []) => {
     const grouped = {};
@@ -119,6 +129,18 @@ const ListeUtilisateurs = () => {
             Ajouter un utilisateur
           </button>
         </div>
+
+        {notice && (
+          <div
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
+              notice.type === "warning"
+                ? "border-amber-200 bg-amber-50 text-amber-800"
+                : "border-emerald-200 bg-emerald-50 text-emerald-800"
+            }`}
+          >
+            {notice.message}
+          </div>
+        )}
 
         {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 

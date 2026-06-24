@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 
 from admin_config.models.gamme import Gamme
 from admin_config.models.measured_result_comment import StepMeasuredResultComment
@@ -17,6 +18,11 @@ from admin_config.services.access_control import (
 )
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Lister les commentaires de resultat mesure",
+    description="Liste les commentaires associes a un EV/step d'une gamme.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_measured_result_comments(request, gamme_id):
@@ -55,6 +61,11 @@ def list_measured_result_comments(request, gamme_id):
     return Response(serializer.data)
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Creer un commentaire de resultat mesure",
+    description="Ajoute un commentaire sur un resultat mesure pour un EV/step.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_measured_result_comment(request, gamme_id):
@@ -114,6 +125,11 @@ def create_measured_result_comment(request, gamme_id):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Modifier un commentaire de resultat mesure",
+    description="Modifie un commentaire de resultat mesure existant.",
+)
 @api_view(["PUT", "PATCH"])
 @permission_classes([IsAuthenticated])
 def update_measured_result_comment(request, comment_id):
@@ -169,6 +185,11 @@ def update_measured_result_comment(request, comment_id):
     return Response(serializer.data)
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Supprimer un commentaire de resultat mesure",
+    description="Supprime un commentaire de resultat mesure existant.",
+)
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_measured_result_comment(request, comment_id):

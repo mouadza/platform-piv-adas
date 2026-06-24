@@ -4,8 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 import { dashboardsAPI } from "../../api/index";
 import { getTokenPayload } from "../../utils/roles";
-import { downloadProjectKPI } from "../../utils/kpiDownloads";
+import { getProjectKPIPreview } from "../../utils/kpiDownloads";
+import {
+  exportProjectKpiInBackground,
+  prepareProjectKpiInBackground,
+} from "../../utils/backgroundProjectKpiExport";
 import DashboardLayout from "../DashboardLayout";
+import {
+  ProjectKpiModal,
+  SyntheseModal,
+} from "../listeGammes/ListeGammesContent";
 
 const themeClasses = {
   blue: {
@@ -113,7 +121,7 @@ const ProjectCard = ({
         className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Download size={14} />
-        {isDownloading ? "Generation..." : "KPI Projet"}
+        {isDownloading ? "Chargement..." : "KPI Projet"}
       </button>
 
       <div
@@ -141,6 +149,18 @@ const AssignedProjectsDashboard = ({
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [downloadingProjectKPI, setDownloadingProjectKPI] = useState({});
+  const [exportingProjectKPI, setExportingProjectKPI] = useState({});
+  const [projectExportJobs, setProjectExportJobs] = useState({});
+  const [projectKpiModal, setProjectKpiModal] = useState({
+    isOpen: false,
+    data: null,
+  });
+  const [syntheseModal, setSyntheseModal] = useState({
+    isOpen: false,
+    type: "info",
+    title: "",
+    message: "",
+  });
 
   useEffect(() => {
     const decoded = getTokenPayload();
@@ -168,12 +188,75 @@ const AssignedProjectsDashboard = ({
 
     try {
       setDownloadingProjectKPI((prev) => ({ ...prev, [projet.id]: true }));
-      await downloadProjectKPI(projet);
+      setProjectExportJobs((prev) => ({
+        ...prev,
+        [projet.id]: {
+          status: "CREATING",
+          progress: 0,
+          download_ready: false,
+        },
+      }));
+      void prepareProjectKpiInBackground({
+        projectId: projet.id,
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      }).catch((preparationError) => {
+        console.error(preparationError);
+        setProjectExportJobs((prev) => ({
+          ...prev,
+          [projet.id]: {
+            ...prev[projet.id],
+            status: "FAILURE",
+            error_message: preparationError.message,
+          },
+        }));
+      });
+      const result = await getProjectKPIPreview(projet);
+      setProjectKpiModal({
+        isOpen: true,
+        data: result,
+      });
     } catch (err) {
       console.error(err);
-      alert("Erreur KPI projet");
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur KPI Projet",
+        message: "Une erreur est survenue lors du chargement du KPI projet.",
+      });
     } finally {
       setDownloadingProjectKPI((prev) => ({ ...prev, [projet.id]: false }));
+    }
+  };
+
+  const handleExportProjectKPI = async (projet) => {
+    try {
+      setExportingProjectKPI((prev) => ({ ...prev, [projet.id]: true }));
+      await exportProjectKpiInBackground({
+        projectId: projet.id,
+        projectName: projet.nom_projet,
+        preparedJob: projectExportJobs[projet.id],
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      });
+    } catch (err) {
+      console.error(err);
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur KPI Projet",
+        message:
+          err?.message ||
+          "Une erreur est survenue lors de la generation du KPI projet.",
+      });
+    } finally {
+      setExportingProjectKPI((prev) => ({ ...prev, [projet.id]: false }));
     }
   };
 
@@ -232,6 +315,38 @@ const AssignedProjectsDashboard = ({
           )}
         </div>
       </div>
+
+      <ProjectKpiModal
+        modal={projectKpiModal}
+        isExporting={Boolean(
+          projectKpiModal.data?.projet?.id &&
+            exportingProjectKPI[projectKpiModal.data.projet.id]
+        )}
+        onClose={() =>
+          setProjectKpiModal({
+            isOpen: false,
+            data: null,
+          })
+        }
+        onExport={handleExportProjectKPI}
+        exportJob={
+          projectKpiModal.data?.projet?.id
+            ? projectExportJobs[projectKpiModal.data.projet.id]
+            : null
+        }
+      />
+
+      <SyntheseModal
+        syntheseModal={syntheseModal}
+        onClose={() =>
+          setSyntheseModal({
+            isOpen: false,
+            type: "info",
+            title: "",
+            message: "",
+          })
+        }
+      />
     </DashboardLayout>
   );
 };

@@ -5,19 +5,25 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from admin_config.models import Affectation, CustomUser
 from admin_config.permissions import IsAdminUserOnly
 from admin_config.serializers.user_serializers import CustomUserSerializer
-from admin_config.services.email_service import send_account_authorized_email
 from admin_config.services.audit_service import log_audit_event
 from admin_config.services.user_service import (
     create_user_service,
     delete_user_service,
     list_users_service,
 )
+from admin_config.tasks import dispatch_account_authorized_email
 
 
+@extend_schema(
+    tags=["Users"],
+    summary="Creer un utilisateur",
+    description="Cree un utilisateur, affecte ses roles et tente d'envoyer l'email d'autorisation.",
+)
 @api_view(["POST"])
 @permission_classes([IsAdminUserOnly])
 def create_user(request):
@@ -68,7 +74,7 @@ def create_user(request):
         )
 
         try:
-            send_account_authorized_email(user)
+            email_result = dispatch_account_authorized_email(user)
         except Exception as exc:
             return Response(
                 {
@@ -77,7 +83,23 @@ def create_user(request):
                         "d'autorisation n'a pas pu etre envoye."
                     ),
                     "email_sent": False,
+                    "email_queued": False,
                     "email_error": str(exc),
+                    "user_id": user.id,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        if email_result["queued"]:
+            return Response(
+                {
+                    "message": (
+                        "Utilisateur cree avec succes. "
+                        "Email d'autorisation mis en file d'attente."
+                    ),
+                    "email_sent": False,
+                    "email_queued": True,
+                    "email_task_id": email_result["task_id"],
                     "user_id": user.id,
                 },
                 status=status.HTTP_201_CREATED,
@@ -90,6 +112,7 @@ def create_user(request):
                     "Email d'autorisation envoye."
                 ),
                 "email_sent": True,
+                "email_queued": False,
                 "user_id": user.id,
             },
             status=status.HTTP_201_CREATED,
@@ -108,6 +131,11 @@ def create_user(request):
         )
 
 
+@extend_schema(
+    tags=["Users"],
+    summary="Profil utilisateur connecte",
+    description="Retourne les informations principales de l'utilisateur authentifie.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me(request):
@@ -122,6 +150,11 @@ def me(request):
     )
 
 
+@extend_schema(
+    tags=["Users"],
+    summary="Lister les utilisateurs",
+    description="Retourne la liste des utilisateurs de la plateforme.",
+)
 @api_view(["GET"])
 @permission_classes([IsAdminUserOnly])
 def list_users(request):
@@ -130,6 +163,11 @@ def list_users(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Users"],
+    summary="Modifier un utilisateur",
+    description="Modifie les informations, le mot de passe et les affectations d'un utilisateur.",
+)
 @api_view(["PUT"])
 @permission_classes([IsAdminUserOnly])
 def modif_user(request, pk):
@@ -177,6 +215,11 @@ def modif_user(request, pk):
     )
 
 
+@extend_schema(
+    tags=["Users"],
+    summary="Supprimer un utilisateur",
+    description="Supprime un utilisateur et journalise l'action dans l'audit.",
+)
 @api_view(["DELETE"])
 @permission_classes([IsAdminUserOnly])
 def delete_user(request, user_id):

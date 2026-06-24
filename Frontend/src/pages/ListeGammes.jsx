@@ -4,15 +4,21 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import {
   CommentsModal,
+  GammeKpiModal,
   ListeGammesProjects,
+  ProjectKpiModal,
   SyntheseModal,
 } from "../components/listeGammes/ListeGammesContent";
 import { gammesAPI, projectsAPI } from "../api/index";
 import {
-  downloadProjectKPI,
+  getProjectKPIPreview,
   getGammeDisplayName,
   getProjectDisplayName,
 } from "../utils/kpiDownloads";
+import {
+  exportProjectKpiInBackground,
+  prepareProjectKpiInBackground,
+} from "../utils/backgroundProjectKpiExport";
 import { downloadModifiedGammeExcel } from "../utils/modifiedGammeExcelDownload";
 import {
   getAssignedProjectsForRole,
@@ -35,6 +41,12 @@ const ListeGammes = () => {
   const [loading, setLoading] = useState(true);
   const [loadingGammes, setLoadingGammes] = useState({});
   const [downloadingProjectKPI, setDownloadingProjectKPI] = useState({});
+  const [exportingProjectKPI, setExportingProjectKPI] = useState({});
+  const [projectExportJobs, setProjectExportJobs] = useState({});
+  const [projectKpiModal, setProjectKpiModal] = useState({
+    isOpen: false,
+    data: null,
+  });
   const [downloadingExcel, setDownloadingExcel] = useState({});
   const [savingDates, setSavingDates] = useState({});
   const [error, setError] = useState("");
@@ -43,9 +55,13 @@ const ListeGammes = () => {
     useGeneralCommentsModal();
   const {
     downloadingKPI,
+    exportingKPI,
+    gammeKpiModal,
     syntheseModal,
     setSyntheseModal,
     handleDownloadKPI,
+    handleExportGammeKPI,
+    closeGammeKpiModal,
     closeSyntheseModal,
   } = useGammeKpiDownload();
 
@@ -78,6 +94,7 @@ const ListeGammes = () => {
       setLoadingGammes((prev) => ({ ...prev, [projetId]: true }));
 
       const data = await gammesAPI.listByProjet(projetId);
+      console.log("Les gammes:", data);
       setGammesByProjet((prev) => ({ ...prev, [projetId]: data || [] }));
     } catch (err) {
       console.error(err);
@@ -112,15 +129,87 @@ const ListeGammes = () => {
   const handleDownloadProjectKPI = async (projet) => {
     try {
       setDownloadingProjectKPI((prev) => ({ ...prev, [projet.id]: true }));
-      await downloadProjectKPI(projet);
+      setProjectExportJobs((prev) => ({
+        ...prev,
+        [projet.id]: {
+          status: "CREATING",
+          progress: 0,
+          download_ready: false,
+        },
+      }));
+      void prepareProjectKpiInBackground({
+        projectId: projet.id,
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      }).catch((preparationError) => {
+        console.error(preparationError);
+        setProjectExportJobs((prev) => ({
+          ...prev,
+          [projet.id]: {
+            ...prev[projet.id],
+            status: "FAILURE",
+            error_message: preparationError.message,
+          },
+        }));
+      });
+      const result = await getProjectKPIPreview(projet);
+      setProjectKpiModal({
+        isOpen: true,
+        data: result,
+      });
       return true;
     } catch (err) {
       console.error(err);
-      alert("Erreur KPI projet");
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur KPI Projet",
+        message: "Une erreur est survenue lors du chargement du KPI projet.",
+      });
       return false;
     } finally {
       setDownloadingProjectKPI((prev) => ({ ...prev, [projet.id]: false }));
     }
+  };
+
+  const handleExportProjectKPI = async (projet) => {
+    try {
+      setExportingProjectKPI((prev) => ({ ...prev, [projet.id]: true }));
+      await exportProjectKpiInBackground({
+        projectId: projet.id,
+        projectName: getProjectDisplayName(projet),
+        preparedJob: projectExportJobs[projet.id],
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      });
+      return true;
+    } catch (err) {
+      console.error(err);
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur KPI Projet",
+        message:
+          err?.message ||
+          "Une erreur est survenue lors de la generation du KPI projet.",
+      });
+      return false;
+    } finally {
+      setExportingProjectKPI((prev) => ({ ...prev, [projet.id]: false }));
+    }
+  };
+
+  const closeProjectKpiModal = () => {
+    setProjectKpiModal({
+      isOpen: false,
+      data: null,
+    });
   };
 
   const handleUpdateGammeDates = async (gamme, dates) => {
@@ -240,6 +329,31 @@ const ListeGammes = () => {
         <CommentsModal
           commentModal={commentModal}
           onClose={closeCommentsModal}
+        />
+
+        <GammeKpiModal
+          modal={gammeKpiModal}
+          isExporting={Boolean(
+            gammeKpiModal.data?.gamme?.id &&
+              exportingKPI[gammeKpiModal.data.gamme.id]
+          )}
+          onClose={closeGammeKpiModal}
+          onExport={handleExportGammeKPI}
+        />
+
+        <ProjectKpiModal
+          modal={projectKpiModal}
+          isExporting={Boolean(
+            projectKpiModal.data?.projet?.id &&
+              exportingProjectKPI[projectKpiModal.data.projet.id]
+          )}
+          onClose={closeProjectKpiModal}
+          onExport={handleExportProjectKPI}
+          exportJob={
+            projectKpiModal.data?.projet?.id
+              ? projectExportJobs[projectKpiModal.data.projet.id]
+              : null
+          }
         />
 
         <SyntheseModal

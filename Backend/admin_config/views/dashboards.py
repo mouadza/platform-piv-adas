@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from admin_config.permissions import (
     IsAdminUserOnly,
@@ -16,6 +17,11 @@ from admin_config.services.dashboard_service import (
 )
 
 
+@extend_schema(
+    tags=["KPI"],
+    summary="Dashboard administrateur",
+    description="Retourne les KPI globaux, graphiques decisionnels et activites recentes.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdminUserOnly])
 def dash(request):
@@ -23,6 +29,11 @@ def dash(request):
     return Response(data)
 
 
+@extend_schema(
+    tags=["KPI"],
+    summary="Dashboard PPL",
+    description="Retourne les projets assignes au PPL connecte.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsPPLUser])
 def ppl_dashboard(request):
@@ -39,6 +50,11 @@ def ppl_dashboard(request):
     })
 
 
+@extend_schema(
+    tags=["KPI"],
+    summary="Dashboard valideur",
+    description="Retourne les projets assignes au valideur connecte.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsValideur])
 def valideur_dashboard(request):

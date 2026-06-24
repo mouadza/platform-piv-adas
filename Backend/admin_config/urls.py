@@ -7,6 +7,11 @@ from admin_config.views.measured_result_comments import (
     update_measured_result_comment,
 )
 from admin_config.views.audit import list_audit_logs
+from admin_config.views.jobs import (
+    create_project_kpi_job,
+    download_job_result,
+    job_detail,
+)
 from admin_config.views.dashboards import (
     dash,
     ppl_dashboard,
@@ -43,6 +48,7 @@ from admin_config.views.gammes import (
     reorder_gammes,
     list_gammes_valideur,
     get_new_gamme,
+    gamme_parse_status,
     export_modified_gamme_excel
 )
 
@@ -94,6 +100,25 @@ urlpatterns = [
     path("audit-logs/", list_audit_logs, name="audit_logs"),
 
     # ============================
+    # BACKGROUND JOBS / KPI
+    # ============================
+    path(
+        "jobs/project-kpi/",
+        create_project_kpi_job,
+        name="create_project_kpi_job",
+    ),
+    path(
+        "jobs/<uuid:job_id>/",
+        job_detail,
+        name="background_job_detail",
+    ),
+    path(
+        "jobs/<uuid:job_id>/download/",
+        download_job_result,
+        name="background_job_download",
+    ),
+
+    # ============================
     # USERS
     # ============================
     path('create-user/', create_user, name='create-user'),
@@ -117,6 +142,11 @@ urlpatterns = [
     # GAMMES
     # ============================
     path("newgamme/<int:gamme_id>/", get_new_gamme),
+    path(
+        "gammes/<int:gamme_id>/parse-status/",
+        gamme_parse_status,
+        name="gamme_parse_status",
+    ),
     path("gammes/<int:projet_id>/valideur/", list_gammes_valideur),
     path("gammes/import/", import_gammes),
     path("gammes/template/", get_gamme_template),

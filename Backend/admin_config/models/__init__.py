@@ -8,3 +8,5 @@ from .measured_result_comment import StepMeasuredResultComment
 from .email_otp import EmailOTP
 from .audit import AuditLog
 from .config import *
+from .background_job import BackgroundJob
+from .gamme_parsed_data import GammeParsedData

@@ -1,11 +1,15 @@
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 
 from admin_config.models import Affectation, CustomUser, Projet, Role
 
 
-@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    CELERY_EMAIL_ASYNC=False,
+)
 class UserCreationTests(APITestCase):
     def setUp(self):
         self.admin = CustomUser.objects.create_superuser(
@@ -54,6 +58,36 @@ class UserCreationTests(APITestCase):
                 role=self.role,
                 projet=self.projet,
             ).exists()
+        )
+
+    def test_user_is_created_when_authorization_email_fails(self):
+        payload = {
+            "username": "No Mail User",
+            "email": "no.mail@stellantis.com",
+            "affectations": [
+                {
+                    "role": self.role.id,
+                    "projet": self.projet.id,
+                }
+            ],
+        }
+
+        with patch(
+            "admin_config.tasks.send_account_authorized_email",
+            side_effect=Exception("SMTP unavailable"),
+        ):
+            response = self.client.post(
+                "/admin_config/create-user/",
+                payload,
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(response.data["email_sent"])
+        self.assertFalse(response.data["email_queued"])
+        self.assertEqual(response.data["email_error"], "SMTP unavailable")
+        self.assertTrue(
+            CustomUser.objects.filter(email="no.mail@stellantis.com").exists()
         )
 
     def test_create_user_duplicate_email_refused(self):

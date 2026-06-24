@@ -884,3 +884,125 @@ Quand la demo fonctionne, passe a la vraie version :
 4. Ajouter des backups
 5. Eventuellement migrer PostgreSQL vers AWS RDS
 ```
+
+## 17. Si le PC entreprise bloque `http://IP_PUBLIQUE_AWS`
+
+Certains reseaux entreprise bloquent les URLs du type :
+
+```text
+http://13.48.126.173
+```
+
+Ca ne veut pas forcement dire que ton serveur AWS ne marche pas. Ca peut juste vouloir dire :
+
+```text
+Le PC entreprise bloque HTTP sans domaine ou bloque les IP publiques directes.
+```
+
+Solution demo sans acheter de domaine : utiliser `sslip.io`.
+
+Avec ton IP `13.48.126.173`, le domaine demo devient :
+
+```text
+13-48-126-173.sslip.io
+```
+
+Ce domaine pointe automatiquement vers :
+
+```text
+13.48.126.173
+```
+
+### 17.1 Ouvrir HTTPS dans AWS
+
+Dans le Security Group AWS, ajoute :
+
+```text
+HTTPS TCP 443 0.0.0.0/0
+```
+
+Garde aussi :
+
+```text
+HTTP TCP 80 0.0.0.0/0
+SSH  TCP 22 Ton IP
+```
+
+### 17.2 Ouvrir HTTPS dans Ubuntu
+
+Sur la VM :
+
+```bash
+sudo ufw allow 443
+sudo ufw status
+```
+
+### 17.3 Modifier le `.env`
+
+Sur la VM :
+
+```bash
+cd /opt/validation-platform-demo
+nano Backend/.env
+```
+
+Remplace les valeurs IP par le domaine `sslip.io` :
+
+```env
+DJANGO_ALLOWED_HOSTS=13.48.126.173,13-48-126-173.sslip.io
+FRONTEND_URL=https://13-48-126-173.sslip.io
+CORS_ALLOWED_ORIGINS=http://13.48.126.173,https://13-48-126-173.sslip.io
+CSRF_TRUSTED_ORIGINS=http://13.48.126.173,https://13-48-126-173.sslip.io
+SESSION_COOKIE_SECURE=true
+CSRF_COOKIE_SECURE=true
+```
+
+Sauvegarde :
+
+```text
+CTRL + O
+Enter
+CTRL + X
+```
+
+Redemarre le backend :
+
+```bash
+docker compose -f docker-compose.aws.yml up -d --build
+```
+
+### 17.4 Installer Certbot
+
+Sur la VM :
+
+```bash
+sudo snap install --classic certbot
+sudo ln -sf /snap/bin/certbot /usr/local/bin/certbot
+```
+
+### 17.5 Demander un certificat HTTPS
+
+Sur la VM :
+
+```bash
+sudo certbot --nginx -d 13-48-126-173.sslip.io
+```
+
+Certbot va modifier Nginx automatiquement.
+
+Teste :
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 17.6 Ouvrir l'application
+
+Depuis le PC entreprise, essaie maintenant :
+
+```text
+https://13-48-126-173.sslip.io
+```
+
+Si c'est encore bloque par le proxy entreprise, teste depuis un telephone en 4G/5G. Si ca marche depuis le telephone, ton deploiement AWS est correct et seul le reseau entreprise bloque l'acces.

@@ -1,6 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
     "corsheaders",
     "admin_config",
 ]
@@ -90,6 +92,8 @@ if DB_ENGINE in {"postgres", "postgresql"}:
             "PASSWORD": os.getenv("DB_PASSWORD", ""),
             "HOST": os.getenv("DB_HOST", "localhost"),
             "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+            "CONN_HEALTH_CHECKS": env_bool("DB_CONN_HEALTH_CHECKS", True),
             "OPTIONS": {
                 "sslmode": os.getenv("DB_SSLMODE", "prefer"),
             },
@@ -145,6 +149,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -164,6 +169,29 @@ REST_FRAMEWORK = {
     },
 }
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Validation Platform API",
+    "DESCRIPTION": "API de gestion des projets, gammes, validations, KPI et audit.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+        "filter": True,
+    },
+    "TAGS": [
+        {"name": "Auth", "description": "Connexion JWT et OTP"},
+        {"name": "Users", "description": "Gestion des utilisateurs"},
+        {"name": "Projects", "description": "Gestion des projets"},
+        {"name": "Gammes", "description": "Import, consultation et modification des gammes"},
+        {"name": "Validations", "description": "Cotations, commentaires et historique"},
+        {"name": "KPI", "description": "Dashboards, indicateurs et resultats KPI"},
+        {"name": "Configurations", "description": "Referentiels de configuration"},
+        {"name": "Audit", "description": "Traçabilité des actions"},
+    ],
+}
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
         minutes=int(os.getenv("JWT_ACCESS_TOKEN_MINUTES", "60"))
@@ -173,6 +201,46 @@ SIMPLE_JWT = {
     ),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+
+CELERY_BROKER_URL = os.getenv(
+    "CELERY_BROKER_URL",
+    "amqp://guest:guest@localhost:5672//",
+)
+CELERY_RESULT_BACKEND = os.getenv(
+    "CELERY_RESULT_BACKEND",
+    "redis://localhost:6379/1",
+)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_RESULT_EXPIRES = int(os.getenv("CELERY_RESULT_EXPIRES", "86400"))
+CELERY_TASK_SOFT_TIME_LIMIT = int(
+    os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", "1500")
+)
+CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", "1800"))
+CELERY_EMAIL_ASYNC = env_bool("CELERY_EMAIL_ASYNC", False)
+CELERY_EMAIL_FALLBACK_SYNC = env_bool("CELERY_EMAIL_FALLBACK_SYNC", True)
+
+REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "redis://localhost:6379/2")
+if "test" in sys.argv:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "validation-platform-tests",
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_CACHE_URL,
+            "TIMEOUT": 86400,
+        }
+    }
 
 
 CORS_ALLOWED_ORIGINS = env_list(
@@ -232,6 +300,7 @@ EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "5"))
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER or "no-reply@validation-app.local",

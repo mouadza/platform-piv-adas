@@ -95,12 +95,26 @@ const GestionCompte = () => {
 
     try {
       setSaving(true);
-      await usersAPI.create(payload);
-      navigate("/listeUser");
+      const result = await usersAPI.create(payload);
+      navigate("/listeUser", {
+        state:
+          result?.email_sent === false
+            ? {
+                warning:
+                  result.message ||
+                  "Compte cree, mais l'email d'autorisation n'a pas pu etre envoye.",
+              }
+            : {
+                success:
+                  result?.message ||
+                  "Compte utilisateur cree avec succes.",
+              },
+      });
     } catch (err) {
         setError(
-          err.response?.data?.detail ||
-          JSON.stringify(err.response?.data) ||
+          err.data?.detail ||
+          err.data?.error ||
+          err.message ||
           "Erreur lors de la création du compte."
         );
     } finally {

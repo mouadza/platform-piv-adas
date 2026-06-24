@@ -663,4 +663,6 @@ export const generateSyntheseGammeExcel = async ({
     }),
     fileName
   );
+
+  return { fileName };
 };

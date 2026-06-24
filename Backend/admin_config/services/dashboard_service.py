@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Max, Q, Subquery
 from django.db.models.functions import TruncMonth
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -57,10 +57,22 @@ def admin_dashboard_service(user):
         "fonction_gamme",
     ).all()
 
-    validations_qs = StepValidation.objects.select_related(
+    validation_history_qs = StepValidation.objects.select_related(
         "gamme",
         "user",
     ).all()
+    latest_validation_ids = (
+        StepValidation.objects.values("gamme_id", "ev_code", "step_code")
+        .annotate(latest_id=Max("id"))
+        .values("latest_id")
+    )
+    validations_qs = StepValidation.objects.filter(
+        id__in=Subquery(latest_validation_ids)
+    ).select_related(
+        "gamme",
+        "gamme__projet",
+        "user",
+    )
 
     total_users = User.objects.count()
     total_projets = projets_qs.count()
@@ -80,7 +92,7 @@ def admin_dashboard_service(user):
 
     # Évolution mensuelle
     evolution_qs = (
-        validations_qs.annotate(month=TruncMonth("created_at"))
+        validation_history_qs.annotate(month=TruncMonth("created_at"))
         .values("month")
         .annotate(
             ok=Count("id", filter=Q(cotation="OK")),
@@ -88,7 +100,7 @@ def admin_dashboard_service(user):
             nok_mineur=Count("id", filter=Q(cotation="NOK_mineur")),
             a_traiter=Count(
                 "id",
-                filter=Q(cotation="A_coter") | Q(cotation="Non_coté"),
+                filter=Q(cotation="A_coter") | Q(cotation__startswith="Non_cot"),
             ),
             total=Count("id"),
         )
@@ -126,7 +138,7 @@ def admin_dashboard_service(user):
                 "gammes__step_validations",
                 filter=(
                     Q(gammes__step_validations__cotation="A_coter")
-                    | Q(gammes__step_validations__cotation="Non_coté")
+                    | Q(gammes__step_validations__cotation__startswith="Non_cot")
                 ),
             ),
             total_cotations=Count("gammes__step_validations"),
@@ -146,6 +158,99 @@ def admin_dashboard_service(user):
             "total": projet.total_cotations,
         }
         for projet in projects_cotation_qs
+    ]
+
+    global_cotations = validations_qs.aggregate(
+        OK=Count("id", filter=Q(cotation="OK")),
+        NOK=Count("id", filter=Q(cotation="NOK")),
+        NOK_mineur=Count("id", filter=Q(cotation="NOK_mineur")),
+        A_traiter=Count(
+            "id",
+            filter=Q(cotation="A_coter") | Q(cotation__startswith="Non_cot"),
+        ),
+        total=Count("id"),
+    )
+    ok_rate = (
+        round((global_cotations["OK"] / global_cotations["total"]) * 100, 1)
+        if global_cotations["total"]
+        else 0
+    )
+    nok_rate = (
+        round(
+            (
+                (global_cotations["NOK"] + global_cotations["NOK_mineur"])
+                / global_cotations["total"]
+            )
+            * 100,
+            1,
+        )
+        if global_cotations["total"]
+        else 0
+    )
+
+    project_progress = []
+
+    for projet in projets_qs.order_by("nom_projet"):
+        project_validations = validations_qs.filter(gamme__projet_id=projet.id)
+        total_project_gammes = gammes_qs.filter(projet_id=projet.id).count()
+        started_gammes = project_validations.values("gamme_id").distinct().count()
+        not_started_gammes = max(total_project_gammes - started_gammes, 0)
+        cotations = project_validations.aggregate(
+            OK=Count("id", filter=Q(cotation="OK")),
+            NOK=Count("id", filter=Q(cotation="NOK")),
+            NOK_mineur=Count("id", filter=Q(cotation="NOK_mineur")),
+            A_traiter=Count(
+                "id",
+                filter=Q(cotation="A_coter") | Q(cotation__startswith="Non_cot"),
+            ),
+            total=Count("id"),
+        )
+        advancement_percent = (
+            round((started_gammes / total_project_gammes) * 100, 1)
+            if total_project_gammes
+            else 0
+        )
+        risk_score = (
+            cotations["NOK"] * 3
+            + cotations["NOK_mineur"] * 2
+            + cotations["A_traiter"]
+            + not_started_gammes * 2
+        )
+
+        project_progress.append(
+            {
+                "project_id": projet.id,
+                "project_name": getattr(projet, "nom_projet", None) or str(projet),
+                "total_gammes": total_project_gammes,
+                "gammes_started": started_gammes,
+                "gammes_not_started": not_started_gammes,
+                "advancement_percent": advancement_percent,
+                "risk_score": risk_score,
+                **cotations,
+            }
+        )
+
+    risk_projects = sorted(
+        [item for item in project_progress if item["risk_score"] > 0],
+        key=lambda item: item["risk_score"],
+        reverse=True,
+    )[:5]
+    repartition_cotations_by_project = [
+        {
+            "project_id": item["project_id"],
+            "project_name": item["project_name"],
+            "OK": item["OK"],
+            "NOK": item["NOK"],
+            "NOK_mineur": item["NOK_mineur"],
+            "A_traiter": item["A_traiter"],
+            "total": item["total"],
+        }
+        for item in sorted(
+            project_progress,
+            key=lambda project: project["total"],
+            reverse=True,
+        )
+        if item["total"] > 0
     ]
 
     recent_gammes_qs = gammes_qs.order_by("-created_at")[:6]
@@ -173,7 +278,7 @@ def admin_dashboard_service(user):
         for gamme in recent_gammes_qs
     ]
 
-    recent_validations_qs = validations_qs.order_by("-created_at")[:8]
+    recent_validations_qs = validation_history_qs.order_by("-created_at")[:8]
 
     recent_validations = [
         {
@@ -201,6 +306,10 @@ def admin_dashboard_service(user):
         "total_gammes": total_gammes,
         "gammes_started": gammes_started,
         "taux_demarrage_validation": taux_demarrage_validation,
+        "global_ok_rate": ok_rate,
+        "global_nok_rate": nok_rate,
+        "projects_at_risk": len(risk_projects),
+        "total_current_cotations": global_cotations["total"],
     }
 
     return {
@@ -208,6 +317,9 @@ def admin_dashboard_service(user):
         "generated_at": timezone.now(),
         "kpis": kpis,
         "evolution": evolution,
+        "global_cotations": global_cotations,
+        "project_progress": project_progress,
+        "risk_projects": risk_projects,
         "repartition_cotations_by_project": repartition_cotations_by_project,
         "recent_gammes": recent_gammes,
         "recent_validations": recent_validations,

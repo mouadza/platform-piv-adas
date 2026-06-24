@@ -189,4 +189,27 @@ describe('normalizeApiBaseUrl', () => {
       filename: '',
     })
   })
+
+  it('polls until asynchronous gamme parsing is ready', async () => {
+    const get = vi
+      .spyOn(api, 'get')
+      .mockResolvedValueOnce({
+        data: { parse_status: 'PENDING', progress: 0 },
+      })
+      .mockResolvedValueOnce({
+        data: { parse_status: 'STARTED', progress: 10 },
+      })
+      .mockResolvedValueOnce({
+        data: { colonnes: ['EV'], blocs: [] },
+      })
+    const onProgress = vi.fn()
+
+    await expect(
+      gammesAPI.parse(7, { pollInterval: 0, maxAttempts: 3, onProgress })
+    ).resolves.toEqual({ colonnes: ['EV'], blocs: [] })
+
+    expect(get).toHaveBeenCalledTimes(3)
+    expect(onProgress).toHaveBeenNthCalledWith(1, 0, 'PENDING')
+    expect(onProgress).toHaveBeenNthCalledWith(2, 10, 'STARTED')
+  })
 })

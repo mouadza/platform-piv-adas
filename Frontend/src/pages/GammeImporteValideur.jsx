@@ -14,6 +14,7 @@ import {
 import DashboardLayout from "../components/DashboardLayout";
 import {
   CommentsModal,
+  GammeKpiModal,
   SyntheseModal,
 } from "../components/listeGammes/ListeGammesContent";
 import { gammesAPI } from "../api/index";
@@ -67,8 +68,12 @@ const GammeImporteValideur = () => {
     useGeneralCommentsModal();
   const {
     downloadingKPI,
+    exportingKPI,
+    gammeKpiModal,
     syntheseModal,
     handleDownloadKPI,
+    handleExportGammeKPI,
+    closeGammeKpiModal,
     closeSyntheseModal,
   } = useGammeKpiDownload();
 
@@ -215,7 +220,7 @@ const GammeImporteValideur = () => {
                       className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <Download size={16} />
-                      {downloadingKPI[gamme.id] ? "Generation..." : "KPI"}
+                      {downloadingKPI[gamme.id] ? "Chargement..." : "KPI"}
                     </GammeActionButton>
                   </div>
                 </div>
@@ -279,6 +284,15 @@ const GammeImporteValideur = () => {
         <CommentsModal
           commentModal={commentModal}
           onClose={closeCommentsModal}
+        />
+        <GammeKpiModal
+          modal={gammeKpiModal}
+          isExporting={Boolean(
+            gammeKpiModal.data?.gamme?.id &&
+              exportingKPI[gammeKpiModal.data.gamme.id]
+          )}
+          onClose={closeGammeKpiModal}
+          onExport={handleExportGammeKPI}
         />
         <SyntheseModal
           syntheseModal={syntheseModal}

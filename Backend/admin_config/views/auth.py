@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from admin_config.auth.token_serializers import CustomTokenObtainPairSerializer
 from admin_config.services.audit_service import log_audit_event
@@ -25,6 +26,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     throttle_classes = [AdminLoginThrottle]
 
+    @extend_schema(
+        tags=["Auth"],
+        summary="Connexion administrateur par mot de passe",
+        description="Retourne une paire de tokens JWT pour un administrateur.",
+    )
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
@@ -44,6 +50,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return response
 
 
+@extend_schema(
+    tags=["Auth"],
+    summary="Demander un code OTP",
+    description="Envoie un code OTP par email pour les utilisateurs autorises.",
+)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @throttle_classes([OTPRequestThrottle])
@@ -69,6 +80,11 @@ def request_otp(request):
     return Response(result, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Auth"],
+    summary="Verifier un code OTP",
+    description="Verifie le code OTP et retourne les tokens JWT utilisateur.",
+)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @throttle_classes([OTPVerifyThrottle])

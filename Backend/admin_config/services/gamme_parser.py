@@ -1,6 +1,16 @@
+import hashlib
+import os
 import re
+import time
+
+from django.core.cache import cache
 from openpyxl import load_workbook
 from openpyxl.utils.cell import coordinate_from_string
+
+
+PARSE_CACHE_TIMEOUT = 6 * 60 * 60
+PARSE_LOCK_TIMEOUT = 2 * 60
+PARSE_LOCK_WAIT_SECONDS = 30
 
 
 def clean_html(value):
@@ -55,8 +65,14 @@ def _get_rgb(cell):
 
 
 def parse_gamme(file_path):
+    wb = None
     try:
-        wb = load_workbook(file_path, read_only=False, keep_vba=True)
+        wb = load_workbook(
+            file_path,
+            read_only=False,
+            keep_vba=False,
+            keep_links=False,
+        )
         ws = wb.active
 
         # ── 1. Find the header row ─────────────────────────────────────────
@@ -201,3 +217,57 @@ def parse_gamme(file_path):
         import traceback
         print("❌ ERREUR:", traceback.format_exc())
         return {"error": str(e)}
+    finally:
+        if wb is not None:
+            wb.close()
+
+
+def _parse_cache_key(file_path):
+    stats = os.stat(file_path)
+    fingerprint = (
+        f"v2:{os.path.abspath(file_path)}:{stats.st_size}:"
+        f"{stats.st_mtime_ns}"
+    )
+    digest = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()
+    return f"gamme-parse:{digest}"
+
+
+def parse_gamme_cached(file_path):
+    try:
+        cache_key = _parse_cache_key(file_path)
+        cached = cache.get(cache_key)
+    except Exception:
+        return parse_gamme(file_path)
+
+    if cached is not None:
+        return cached
+
+    lock_key = f"{cache_key}:lock"
+    try:
+        owns_lock = cache.add(lock_key, "1", PARSE_LOCK_TIMEOUT)
+    except Exception:
+        return parse_gamme(file_path)
+
+    if owns_lock:
+        try:
+            parsed = parse_gamme(file_path)
+            if not parsed.get("error"):
+                cache.set(cache_key, parsed, PARSE_CACHE_TIMEOUT)
+            return parsed
+        finally:
+            try:
+                cache.delete(lock_key)
+            except Exception:
+                pass
+
+    deadline = time.monotonic() + PARSE_LOCK_WAIT_SECONDS
+    while time.monotonic() < deadline:
+        time.sleep(0.1)
+        try:
+            cached = cache.get(cache_key)
+        except Exception:
+            break
+        if cached is not None:
+            return cached
+
+    return parse_gamme(file_path)

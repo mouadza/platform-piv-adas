@@ -3,6 +3,7 @@ Django
 django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
+drf-spectacular
 PyJWT
 pytz
 sqlparse
@@ -10,5 +11,8 @@ psycopg2-binary
 python-dotenv
 openpyxl
 coverage
+celery
+django-celery-results
 gunicorn
+redis
 whitenoise

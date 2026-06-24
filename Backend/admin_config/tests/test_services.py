@@ -22,6 +22,7 @@ from admin_config.services.audit_service import (
     log_audit_event,
     sanitize_metadata,
 )
+from admin_config.services.dashboard_service import admin_dashboard_service
 from admin_config.services.otp_service import (
     GENERIC_OTP_RESPONSE,
     OTPRateLimitError,
@@ -156,6 +157,78 @@ class AccessControlServiceTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.data["detail"], "Nope")
+
+
+class AdminDashboardServiceTests(TestCase):
+    def setUp(self):
+        self.admin = CustomUser.objects.create_superuser(
+            username="Dashboard Admin",
+            email="dashboard.admin@stellantis.com",
+            password="StrongPassword123",
+        )
+        self.valideur = CustomUser.objects.create_user(
+            username="Dashboard Valideur",
+            email="dashboard.valideur@stellantis.com",
+        )
+        self.project_a = Projet.objects.create(
+            nom_projet="Projet Decision A",
+            nombre_vehicules=1,
+        )
+        self.project_b = Projet.objects.create(
+            nom_projet="Projet Decision B",
+            nombre_vehicules=1,
+        )
+        self.gamme_a = Gamme.objects.create(
+            projet=self.project_a,
+            nom="Gamme A",
+            nom_gamme="Gamme A",
+        )
+        self.gamme_b = Gamme.objects.create(
+            projet=self.project_a,
+            nom="Gamme B",
+            nom_gamme="Gamme B",
+        )
+        self.gamme_c = Gamme.objects.create(
+            projet=self.project_b,
+            nom="Gamme C",
+            nom_gamme="Gamme C",
+        )
+
+    def create_validation(self, gamme, step_code, cotation):
+        return StepValidation.objects.create(
+            gamme=gamme,
+            ev_code="EV-1",
+            step_code=step_code,
+            cotation=cotation,
+            commentaire="commentaire" if cotation != "OK" else "",
+            user=self.valideur,
+        )
+
+    def test_admin_dashboard_exposes_decision_kpis(self):
+        self.create_validation(self.gamme_a, "S1", "OK")
+        self.create_validation(self.gamme_a, "S2", "NOK_mineur")
+        self.create_validation(self.gamme_c, "S1", "NOK")
+
+        data = admin_dashboard_service(self.admin)
+
+        self.assertEqual(data["global_cotations"]["total"], 3)
+        self.assertEqual(data["global_cotations"]["OK"], 1)
+        self.assertEqual(data["global_cotations"]["NOK"], 1)
+        self.assertEqual(data["global_cotations"]["NOK_mineur"], 1)
+        self.assertEqual(data["kpis"]["global_ok_rate"], 33.3)
+        self.assertIn("project_progress", data)
+        self.assertIn("risk_projects", data)
+
+        project_a = next(
+            item
+            for item in data["project_progress"]
+            if item["project_id"] == self.project_a.id
+        )
+
+        self.assertEqual(project_a["total_gammes"], 2)
+        self.assertEqual(project_a["gammes_started"], 1)
+        self.assertEqual(project_a["gammes_not_started"], 1)
+        self.assertEqual(project_a["advancement_percent"], 50.0)
 
 
 class AuditServiceTests(TestCase):

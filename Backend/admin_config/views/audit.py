@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 from admin_config.audit_actions import VISIBLE_AUDIT_ACTIONS
 from admin_config.models import AuditLog
@@ -8,6 +9,11 @@ from admin_config.permissions import IsAdminUserOnly
 from admin_config.serializers.audit_serializers import AuditLogSerializer
 
 
+@extend_schema(
+    tags=["Audit"],
+    summary="Lister les logs d'audit",
+    description="Retourne les actions auditees avec filtres par action, entite, projet, gamme ou utilisateur.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdminUserOnly])
 def list_audit_logs(request):

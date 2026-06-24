@@ -13,9 +13,21 @@ import { Download } from "lucide-react";
 
 import DashboardLayout from "../components/DashboardLayout";
 import { gammesAPI } from "../api/index";
-import { downloadGammeKPI, downloadProjectKPI } from "../utils/kpiDownloads";
+import {
+  downloadGammeKPI,
+  getGammeKPIPreview,
+  getProjectKPIPreview,
+} from "../utils/kpiDownloads";
+import {
+  exportProjectKpiInBackground,
+  prepareProjectKpiInBackground,
+} from "../utils/backgroundProjectKpiExport";
 import { getAccessToken } from "../utils/authStorage";
 import { normalizeRole } from "../utils/roles";
+import {
+  GammeKpiModal,
+  ProjectKpiModal,
+} from "../components/listeGammes/ListeGammesContent";
 
 const EspaceUser = () => {
   const navigate = useNavigate();
@@ -28,11 +40,24 @@ const EspaceUser = () => {
   const [loading, setLoading] = useState(true);
   const [loadingGammes, setLoadingGammes] = useState({});
   const [downloadingProjectKPI, setDownloadingProjectKPI] = useState({});
+  const [exportingProjectKPI, setExportingProjectKPI] = useState({});
+  const [projectExportJobs, setProjectExportJobs] = useState({});
   const [downloadingKPI, setDownloadingKPI] = useState({});
+  const [exportingKPI, setExportingKPI] = useState({});
   const [error, setError] = useState("");
+  const [gammeKpiModal, setGammeKpiModal] = useState({
+    isOpen: false,
+    data: null,
+  });
+  const [projectKpiModal, setProjectKpiModal] = useState({
+    isOpen: false,
+    data: null,
+  });
 
   const [syntheseModal, setSyntheseModal] = useState({
     isOpen: false,
+    type: "info",
+    title: "",
     message: "",
   });
 
@@ -140,15 +165,82 @@ const EspaceUser = () => {
         [projet.id]: true,
       }));
 
-      await downloadProjectKPI(projet);
+      setProjectExportJobs((prev) => ({
+        ...prev,
+        [projet.id]: {
+          status: "CREATING",
+          progress: 0,
+          download_ready: false,
+        },
+      }));
+      void prepareProjectKpiInBackground({
+        projectId: projet.id,
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      }).catch((preparationError) => {
+        console.error(preparationError);
+        setProjectExportJobs((prev) => ({
+          ...prev,
+          [projet.id]: {
+            ...prev[projet.id],
+            status: "FAILURE",
+            error_message: preparationError.message,
+          },
+        }));
+      });
+
+      const result = await getProjectKPIPreview(projet);
+      setProjectKpiModal({
+        isOpen: true,
+        data: result,
+      });
     } catch (err) {
       console.error(err);
       setSyntheseModal({
         isOpen: true,
-        message: "Une erreur est survenue lors de la generation du KPI projet.",
+        type: "error",
+        title: "Erreur KPI Projet",
+        message: "Une erreur est survenue lors du chargement du KPI projet.",
       });
     } finally {
       setDownloadingProjectKPI((prev) => ({
+        ...prev,
+        [projet.id]: false,
+      }));
+    }
+  };
+
+  const handleExportProjectKPI = async (projet) => {
+    try {
+      setExportingProjectKPI((prev) => ({
+        ...prev,
+        [projet.id]: true,
+      }));
+      await exportProjectKpiInBackground({
+        projectId: projet.id,
+        projectName: getProjectName(projet),
+        preparedJob: projectExportJobs[projet.id],
+        onProgress: (job) =>
+          setProjectExportJobs((prev) => ({
+            ...prev,
+            [projet.id]: job,
+          })),
+      });
+    } catch (err) {
+      console.error(err);
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur KPI Projet",
+        message:
+          err?.message ||
+          "Une erreur est survenue lors de la generation du KPI projet.",
+      });
+    } finally {
+      setExportingProjectKPI((prev) => ({
         ...prev,
         [projet.id]: false,
       }));
@@ -162,19 +254,29 @@ const EspaceUser = () => {
         [gamme.id]: true,
       }));
 
-      const result = await downloadGammeKPI(gamme);
+      const result = await getGammeKPIPreview(gamme);
 
       if (!result.ok) {
         setSyntheseModal({
           isOpen: true,
+          type: "warning",
+          title: "Rapport KPI indisponible",
           message: result.message,
         });
+        return;
       }
+
+      setGammeKpiModal({
+        isOpen: true,
+        data: result,
+      });
     } catch (err) {
       console.error(err);
       setSyntheseModal({
         isOpen: true,
-        message: "Une erreur est survenue lors de la generation du KPI gamme.",
+        type: "error",
+        title: "Erreur KPI",
+        message: "Une erreur est survenue lors du chargement des KPI gamme.",
       });
     } finally {
       setDownloadingKPI((prev) => ({
@@ -182,6 +284,55 @@ const EspaceUser = () => {
         [gamme.id]: false,
       }));
     }
+  };
+
+  const handleExportGammeKPI = async (gamme) => {
+    try {
+      setExportingKPI((prev) => ({
+        ...prev,
+        [gamme.id]: true,
+      }));
+
+      const result = await downloadGammeKPI(gamme);
+
+      if (!result.ok) {
+        setSyntheseModal({
+          isOpen: true,
+          type: "warning",
+          title: "Rapport KPI indisponible",
+          message: result.message,
+        });
+        return;
+      }
+
+    } catch (err) {
+      console.error(err);
+      setSyntheseModal({
+        isOpen: true,
+        type: "error",
+        title: "Erreur export KPI",
+        message: "Une erreur est survenue lors de la generation du KPI gamme.",
+      });
+    } finally {
+      setExportingKPI((prev) => ({
+        ...prev,
+        [gamme.id]: false,
+      }));
+    }
+  };
+
+  const closeGammeKpiModal = () => {
+    setGammeKpiModal({
+      isOpen: false,
+      data: null,
+    });
+  };
+
+  const closeProjectKpiModal = () => {
+    setProjectKpiModal({
+      isOpen: false,
+      data: null,
+    });
   };
 
   const getProjectName = (projet) => {
@@ -345,7 +496,7 @@ const EspaceUser = () => {
                         >
                           <Download size={14} />
                           {downloadingProjectKPI[projet.id]
-                            ? "Generation..."
+                            ? "Chargement..."
                             : "KPI Projet"}
                         </button>
                       </div>
@@ -465,7 +616,7 @@ const EspaceUser = () => {
                                 >
                                   <Download size={14} />
                                   {downloadingKPI[gamme.id]
-                                    ? "Generation..."
+                                    ? "Chargement..."
                                     : "KPI"}
                                 </button>
                               </div>
@@ -481,13 +632,57 @@ const EspaceUser = () => {
           </div>
         )}
 
+        <GammeKpiModal
+          modal={gammeKpiModal}
+          isExporting={Boolean(
+            gammeKpiModal.data?.gamme?.id &&
+              exportingKPI[gammeKpiModal.data.gamme.id]
+          )}
+          onClose={closeGammeKpiModal}
+          onExport={handleExportGammeKPI}
+        />
+
+        <ProjectKpiModal
+          modal={projectKpiModal}
+          isExporting={Boolean(
+            projectKpiModal.data?.projet?.id &&
+              exportingProjectKPI[projectKpiModal.data.projet.id]
+          )}
+          onClose={closeProjectKpiModal}
+          onExport={handleExportProjectKPI}
+          exportJob={
+            projectKpiModal.data?.projet?.id
+              ? projectExportJobs[projectKpiModal.data.projet.id]
+              : null
+          }
+        />
+
         {/* SYNTHESE MODAL */}
         {syntheseModal.isOpen && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-100 bg-red-50">
-                <h3 className="text-sm font-bold text-red-700">
+              <div
+                className={`px-6 py-5 border-b border-slate-100 ${
+                  syntheseModal.type === "success"
+                    ? "bg-emerald-50"
+                    : syntheseModal.type === "warning"
+                    ? "bg-amber-50"
+                    : "bg-red-50"
+                }`}
+              >
+                <h3
+                  className={`text-sm font-bold ${
+                    syntheseModal.type === "success"
+                      ? "text-emerald-700"
+                      : syntheseModal.type === "warning"
+                      ? "text-amber-700"
+                      : "text-red-700"
+                  }`}
+                >
+                  <span>{syntheseModal.title || "Information KPI"}</span>
+                  <span className="hidden">
                   Synthèse indisponible
+                  </span>
                 </h3>
               </div>
 
@@ -503,6 +698,8 @@ const EspaceUser = () => {
                   onClick={() =>
                     setSyntheseModal({
                       isOpen: false,
+                      type: "info",
+                      title: "",
                       message: "",
                     })
                   }

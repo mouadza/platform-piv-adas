@@ -116,6 +116,40 @@ export const usersAPI = {
 /* =========================
    GAMMES
 ========================= */
+const wait = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+
+const waitForParsedGamme = async (
+  gammeId,
+  { pollInterval = 500, maxAttempts = 120, onProgress } = {}
+) => {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const result = await getData(`/admin_config/newgamme/${gammeId}/`);
+
+    if (!result || typeof result !== "object" || !result.parse_status) {
+      return result;
+    }
+
+    onProgress?.(result.progress || 0, result.parse_status);
+
+    if (result.parse_status === "FAILURE") {
+      throw new ApiError(
+        result.error_message || "Le parsing Excel a echoue.",
+        500,
+        result
+      );
+    }
+
+    if (attempt < maxAttempts - 1) {
+      await wait(pollInterval);
+    }
+  }
+
+  throw new ApiError(
+    "Le parsing Excel prend trop de temps. Rechargez la page dans quelques instants.",
+    408
+  );
+};
+
 export const gammesAPI = {
   import: (formData) => {
     return api.post("/admin_config/gammes/import/", formData, {
@@ -123,8 +157,10 @@ export const gammesAPI = {
     });
   },
 
-  parse: (gammeId) =>
-    getData(`/admin_config/newgamme/${gammeId}/`),
+  parse: (gammeId, options) => waitForParsedGamme(gammeId, options),
+
+  parseStatus: (gammeId) =>
+    getData(`/admin_config/gammes/${gammeId}/parse-status/`),
 
   updateStatus: (id, data) =>
     api.patch(`/admin_config/gammes/${id}/status/`, data),
@@ -340,6 +376,20 @@ export const measuredResultCommentsAPI = {
 
   delete: (commentId) =>
     deleteData(`/admin_config/measured-result-comments/${commentId}/delete/`),
+};
+
+export const jobsAPI = {
+  createProjectKPI: (projectId) =>
+    postData("/admin_config/jobs/project-kpi/", {
+      project_id: projectId,
+    }),
+
+  detail: (jobId) => getData(`/admin_config/jobs/${jobId}/`),
+
+  download: (jobId) =>
+    api.get(`/admin_config/jobs/${jobId}/download/`, {
+      responseType: "blob",
+    }),
 };
 /* =========================
    UTILS

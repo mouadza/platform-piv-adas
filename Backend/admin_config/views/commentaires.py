@@ -6,6 +6,7 @@ from admin_config.models.gamme import Gamme, GlobalEVComment
 from admin_config.models.results import StepValidation
 from admin_config.serializers.gamme_serializers import GlobalEVCommentSerializer
 from admin_config.serializers.result_serilaizers import StepValidationSerializer
+from drf_spectacular.utils import extend_schema
 from admin_config.services.audit_service import log_audit_event
 from admin_config.services.gamme_validation_dates import sync_gamme_validation_dates
 from admin_config.services.access_control import (
@@ -26,6 +27,11 @@ from rest_framework import status, permissions
 class StepValidationCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Validations"],
+        summary="Creer une validation de step",
+        description="Enregistre une cotation pour un EV/step et synchronise les dates de validation.",
+    )
     def post(self, request):
         gamme_id = request.data.get("gamme")
 
@@ -71,6 +77,11 @@ class StepValidationCreateView(APIView):
 class StepHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Validations"],
+        summary="Historique d'un step",
+        description="Retourne l'historique des cotations d'un step.",
+    )
     def get(self, request, step_code):
         validations = StepValidation.objects.filter(
             step_code=step_code
@@ -88,6 +99,11 @@ class StepHistoryView(APIView):
 class GammeStepValidationsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Validations"],
+        summary="Historique des validations d'une gamme",
+        description="Retourne toutes les validations enregistrees pour une gamme.",
+    )
     def get(self, request, gamme_id):
         if not can_read_gamme_id(request.user, gamme_id):
             if not gamme_exists(gamme_id):
@@ -117,6 +133,11 @@ def get_user_display_name(user):
     return str(user)
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Creer un commentaire global EV",
+    description="Ajoute un commentaire global pour un EV.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_global_ev_comment(request):
@@ -176,6 +197,11 @@ def create_global_ev_comment(request):
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Modifier un commentaire global EV",
+    description="Modifie un commentaire global EV existant.",
+)
 @api_view(["PATCH", "PUT"])
 @permission_classes([IsAuthenticated])
 def update_global_ev_comment(request, comment_id):
@@ -227,6 +253,11 @@ def update_global_ev_comment(request, comment_id):
 
     return Response(serializer.data)
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Lister les commentaires globaux EV",
+    description="Retourne les commentaires globaux associes a un EV.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_global_ev_comments(request):
@@ -260,7 +291,11 @@ def list_global_ev_comments(request):
     return Response(serializer.data)
 
 
-
+@extend_schema(
+    tags=["Validations"],
+    summary="Supprimer un commentaire global EV",
+    description="Supprime un commentaire global EV existant.",
+)
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_global_ev_comment(request, comment_id):

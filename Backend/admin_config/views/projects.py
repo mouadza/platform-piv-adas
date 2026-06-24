@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 from django.core.exceptions import ValidationError
 
 from admin_config.models.vehicule import Vehicule
@@ -25,6 +26,11 @@ from admin_config.services.access_control import (
 )
 
 
+@extend_schema(
+    tags=["Projects"],
+    summary="Verifier l'existence d'un vehicule",
+    description="Verifie si un vehicule existe par CMQ ou VIN.",
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_vehicule(request):
@@ -44,6 +50,11 @@ def check_vehicule(request):
 
     return Response({"exists": exists})
 
+@extend_schema(
+    tags=["Projects"],
+    summary="Creer un projet",
+    description="Cree un projet et journalise l'action dans l'audit.",
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsAdminUserOnly])
 def createproject(request):
@@ -76,6 +87,11 @@ def createproject(request):
 class ListProjet(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Projects"],
+        summary="Lister les projets",
+        description="Retourne les projets accessibles a l'utilisateur connecte.",
+    )
     def get(self, request):
         projets = filter_projects_for_user(
             list_projects_service(),
@@ -86,6 +102,11 @@ class ListProjet(APIView):
 
 # PROJECT DETAIL
 
+@extend_schema(
+    tags=["Projects"],
+    summary="Detail d'un projet",
+    description="Retourne le detail d'un projet accessible.",
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def projet_detail(request, projet_id):
@@ -103,6 +124,11 @@ def projet_detail(request, projet_id):
 
 # UPDATE PROJECT
 
+@extend_schema(
+    tags=["Projects"],
+    summary="Modifier un projet",
+    description="Modifie les informations d'un projet.",
+)
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated, IsAdminUserOnly])
 def modifier_projet(request, projet_id):
@@ -142,6 +168,11 @@ def modifier_projet(request, projet_id):
 
 # DELETE PROJECT
 
+@extend_schema(
+    tags=["Projects"],
+    summary="Supprimer un projet",
+    description="Supprime un projet et journalise l'action dans l'audit.",
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated, IsAdminUserOnly])
 def delete_projet(request, Projet_id):

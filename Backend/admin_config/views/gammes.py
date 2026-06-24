@@ -7,14 +7,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 
 from admin_config.services.gamme_service import (
     list_gammes_by_projet_service,
 )
-from admin_config.services.gamme_parser import parse_gamme
 from admin_config.services.gamme_validation_dates import sync_gamme_validation_dates
 from admin_config.services.gamme_modified_excel_service import (
     generate_modified_gamme_excel,
+)
+from admin_config.services.gamme_parse_storage import (
+    get_ready_parsed_gamme,
+    schedule_gamme_parsing,
 )
 from admin_config.services.audit_service import log_audit_event
 from admin_config.services.access_control import (
@@ -28,7 +32,7 @@ from admin_config.services.access_control import (
     project_exists,
 )
 
-from admin_config.models import Affectation, Gamme
+from admin_config.models import Affectation, Gamme, GammeParsedData
 from admin_config.services.excel_gamme_service import extract_nom_gamme_from_excel
 from admin_config.serializers.gamme_serializers import (
     GammeCreateSerializer,
@@ -70,6 +74,32 @@ def request_has_gamme_date_values(data):
     return any(data.get(field) not in [None, ""] for field in GAMME_DATE_FIELDS)
 
 
+def _parse_status_payload(record, *, queued=False):
+    if not record:
+        return {
+            "parse_status": "NOT_STARTED",
+            "progress": 0,
+            "ready": False,
+            "queued": queued,
+            "error_message": "",
+        }
+
+    return {
+        "parse_status": record.status,
+        "progress": record.progress,
+        "ready": record.status == GammeParsedData.Status.SUCCESS,
+        "queued": queued,
+        "error_message": record.error_message,
+        "updated_at": record.updated_at,
+        "parsed_at": record.parsed_at,
+    }
+
+
+@extend_schema(
+    tags=["Gammes"],
+    summary="Importer des gammes",
+    description="Importe un ou plusieurs fichiers Excel de gammes pour un projet.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
@@ -173,6 +203,7 @@ def import_gammes(request):
                 original_associe_filename=associe_original_name,
                 nom_gamme=nom_gamme_extracted
             )
+            schedule_gamme_parsing(gamme)
 
             created_ids.append(gamme.id)
 
@@ -198,6 +229,11 @@ def import_gammes(request):
         status=status.HTTP_201_CREATED,
     )
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Creer une gamme",
+    description="Cree une gamme dans un projet avec fichier Excel et metadonnees.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_gamme(request, projet_id):
@@ -258,6 +294,7 @@ def create_gamme(request, projet_id):
         original_associe_filename=associe_original_name,
         nom_gamme=nom_gamme_extracted
     )
+    schedule_gamme_parsing(gamme)
 
     log_audit_event(
         request=request,
@@ -279,6 +316,11 @@ def create_gamme(request, projet_id):
     )
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Recuperer un template de gamme",
+    description="Retourne les champs reutilisables d'une gamme existante selon type procedure et fonction.",
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_gamme_template(request):
@@ -305,6 +347,11 @@ def get_gamme_template(request):
         "nombre_jours": gamme.nombre_jours,
     })
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Lister les gammes d'un projet",
+    description="Retourne les gammes d'un projet accessible a l'utilisateur.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_gammes_by_projet(request, projet_id):
@@ -322,6 +369,11 @@ def list_gammes_by_projet(request, projet_id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Lister les gammes pour un valideur",
+    description="Retourne les gammes d'un projet dans l'espace valideur.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_gammes_valideur(request, projet_id):
@@ -338,6 +390,11 @@ def list_gammes_valideur(request, projet_id):
     serializer = GammeValideurSerializer(gammes, many=True)
     return Response(serializer.data)
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Detail d'une gamme",
+    description="Retourne les informations detaillees d'une gamme.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def gamme_detail(request, gamme_id):
@@ -363,6 +420,11 @@ def gamme_detail(request, gamme_id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Supprimer une gamme",
+    description="Supprime une gamme et journalise l'action dans l'audit.",
+)
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_gamme(request, gamme_id):
@@ -396,6 +458,11 @@ def delete_gamme(request, gamme_id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Modifier une gamme",
+    description="Modifie les metadonnees et fichiers associes d'une gamme.",
+)
 @api_view(["PUT", "PATCH"])
 @permission_classes([IsAuthenticated])
 def update_gamme(request, gamme_id):
@@ -489,6 +556,9 @@ def update_gamme(request, gamme_id):
     if fichier_gamme or fichier_associe:
         gamme.save()
 
+    if fichier_gamme:
+        schedule_gamme_parsing(gamme, force=True)
+
     log_audit_event(
         request=request,
         action="GAMME_UPDATED",
@@ -507,6 +577,11 @@ def update_gamme(request, gamme_id):
     return Response(GammeCreateSerializer(gamme).data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Modifier les dates d'une gamme",
+    description="Met a jour les dates de debut et de fin d'une gamme.",
+)
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_gamme_dates(request, gamme_id):
@@ -548,6 +623,11 @@ def update_gamme_dates(request, gamme_id):
     return Response(GammeListSerializer(gamme).data, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Modifier le statut d'une gamme",
+    description="Met a jour le statut fonctionnel d'une gamme.",
+)
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_gamme_status(request, gamme_id):
@@ -584,6 +664,11 @@ def update_gamme_status(request, gamme_id):
     return Response({"status": "ok"})
 
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Reordonner les gammes",
+    description="Met a jour l'ordre d'affichage des gammes.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def reorder_gammes(request):
@@ -618,35 +703,115 @@ def reorder_gammes(request):
 
     return Response({"status": "ok"})
 
+@extend_schema(
+    tags=["Gammes"],
+    summary="Parser une gamme Excel",
+    description="Parse le fichier Excel d'une gamme pour l'affichage et la validation.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_new_gamme(request, gamme_id):
-
     try:
         gamme = Gamme.objects.get(id=gamme_id)
-
-        if not can_read_gamme(request.user, gamme):
-            return forbidden_response()
-
-        if not gamme.fichier_gamme:
-            return Response(
-                {"error": "Pas de fichier"},
-                status=400
-            )
-
-        parsed = parse_gamme(gamme.fichier_gamme.path)
-
-        return Response(parsed)
-
-    except Exception as e:
-        print("❌ ERREUR NEWGAMME:", str(e)) 
-
+    except Gamme.DoesNotExist:
         return Response(
-            {"error": str(e)},
-            status=500
+            {"error": "Gamme introuvable"},
+            status=status.HTTP_404_NOT_FOUND,
         )
 
+    if not can_read_gamme(request.user, gamme):
+        return forbidden_response()
 
+    if not gamme.fichier_gamme:
+        return Response(
+            {"error": "Pas de fichier"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        parsed, record = get_ready_parsed_gamme(gamme)
+    except (OSError, ValueError) as exc:
+        return Response(
+            {"error": str(exc)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if parsed is not None:
+        return Response(parsed)
+
+    record, queued = schedule_gamme_parsing(gamme)
+
+    if record.status == GammeParsedData.Status.FAILURE:
+        return Response(
+            {
+                "error": record.error_message or "Le parsing Excel a echoue.",
+                **_parse_status_payload(record),
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    return Response(
+        {
+            "detail": "Parsing Excel en cours.",
+            **_parse_status_payload(record, queued=queued),
+        },
+        status=status.HTTP_202_ACCEPTED,
+    )
+
+
+@extend_schema(
+    tags=["Gammes"],
+    summary="Consulter l'etat du parsing d'une gamme",
+    description="Retourne la progression du parsing Excel asynchrone.",
+)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def gamme_parse_status(request, gamme_id):
+    try:
+        gamme = Gamme.objects.get(id=gamme_id)
+    except Gamme.DoesNotExist:
+        return Response(
+            {"error": "Gamme introuvable"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if not can_read_gamme(request.user, gamme):
+        return forbidden_response()
+
+    if not gamme.fichier_gamme:
+        return Response(
+            {"error": "Pas de fichier"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        parsed, record = get_ready_parsed_gamme(gamme)
+    except (OSError, ValueError) as exc:
+        return Response(
+            {"error": str(exc)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if parsed is not None:
+        return Response(_parse_status_payload(record))
+
+    record, queued = schedule_gamme_parsing(gamme)
+    response_status = (
+        status.HTTP_500_INTERNAL_SERVER_ERROR
+        if record.status == GammeParsedData.Status.FAILURE
+        else status.HTTP_200_OK
+    )
+    return Response(
+        _parse_status_payload(record, queued=queued),
+        status=response_status,
+    )
+
+
+@extend_schema(
+    tags=["Gammes"],
+    summary="Exporter l'Excel modifie d'une gamme",
+    description="Genere et telecharge le fichier Excel modifie apres validations.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def export_modified_gamme_excel(request, gamme_id):

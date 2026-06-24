@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from admin_config.models.results import StepValidation
-from admin_config.services.gamme_parser import parse_gamme
+from admin_config.services.gamme_parse_storage import get_ready_parsed_gamme
 
 
 FINAL_COTATIONS = {
@@ -63,7 +63,10 @@ def _build_step_plan_from_file(gamme):
     if not gamme.fichier_gamme:
         return [], {}
 
-    parsed = parse_gamme(gamme.fichier_gamme.path)
+    parsed, _record = get_ready_parsed_gamme(gamme)
+
+    if parsed is None:
+        return [], {}
 
     if parsed.get("error"):
         return [], {}

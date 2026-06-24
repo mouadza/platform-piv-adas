@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from admin_config.models.gamme import Gamme
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from drf_spectacular.utils import extend_schema
 from admin_config.models.commentaire import GammeGeneralComment
 from admin_config.models.results import StepValidation
 from admin_config.services.audit_service import log_audit_event
@@ -30,6 +31,11 @@ def get_user_display_name(user):
 
     return str(user)
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Lister les commentaires generaux d'une gamme",
+    description="Liste les commentaires de type BESOINS ou PISTES d'une gamme.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def lister_gamme_general_comments(request, gamme_id, type_commentaire):
@@ -73,6 +79,11 @@ def lister_gamme_general_comments(request, gamme_id, type_commentaire):
     return Response(data)
 
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Ajouter un commentaire general de gamme",
+    description="Ajoute un commentaire de type BESOINS ou PISTES.",
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def ajouter_gamme_general_comment(request):
@@ -147,6 +158,11 @@ def ajouter_gamme_general_comment(request):
         status=status.HTTP_201_CREATED
     )
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Modifier un commentaire general de gamme",
+    description="Modifie un commentaire general existant.",
+)
 @api_view(["PATCH", "PUT"])
 @permission_classes([IsAuthenticated])
 def modifier_gamme_general_comment(request, commentaire_id):
@@ -200,6 +216,11 @@ def modifier_gamme_general_comment(request, commentaire_id):
         "can_edit": True,
     })
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Supprimer un commentaire general de gamme",
+    description="Supprime un commentaire general existant.",
+)
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def supprimer_gamme_general_comment(request, commentaire_id):
@@ -239,6 +260,11 @@ def supprimer_gamme_general_comment(request, commentaire_id):
         status=status.HTTP_200_OK
     )
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Etat de validation d'une gamme",
+    description="Indique si la validation d'une gamme a deja commence.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def gamme_validation_state(request, gamme_id):

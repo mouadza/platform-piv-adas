@@ -4,11 +4,26 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 pandas = "*"
 decouple = "*"
 dnspython = "*"
+asgiref = "*"
+django = "*"
+django-cors-headers = "*"
+djangorestframework = "*"
+djangorestframework-simplejwt = "*"
+drf-spectacular = "*"
+pyjwt = "*"
+pytz = "*"
+sqlparse = "*"
+psycopg2-binary = "*"
+python-dotenv = "*"
+openpyxl = "*"
 coverage = "*"
+celery = "*"
+django-celery-results = "*"
+gunicorn = "*"
+redis = "*"
 whitenoise = "*"
 
 [dev-packages]

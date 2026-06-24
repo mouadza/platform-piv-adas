@@ -3,10 +3,11 @@ import secrets
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
+from django.utils.html import escape
 
 from admin_config.auth.token_serializers import CustomTokenObtainPairSerializer
 from admin_config.models import EmailOTP
@@ -54,7 +55,7 @@ def is_bootstrap_admin_email(email):
 
 def build_unique_username(User, email):
     base_username = email.split("@", 1)[0].replace(".", " ").strip()
-    base_username = base_username or "Admin Validation App"
+    base_username = base_username or "Admin PIV Platform"
 
     if not User.objects.filter(username=base_username).exists():
         return base_username
@@ -146,49 +147,82 @@ def enforce_otp_fifo(user):
 
 def send_otp_email(user, code):
     expiration_minutes = getattr(settings, "OTP_EXPIRATION_MINUTES", 10)
-    subject = "Code OTP - Validation App"
+    recipient_name = user.username or user.email
+    safe_recipient_name = escape(str(recipient_name))
+    subject = "Votre code de connexion - PIV Platform"
 
     text_content = f"""
-Bonjour {user.username or user.email},
+Bonjour {recipient_name},
 
-Votre code OTP pour Validation App est :
+Voici votre code de connexion a PIV Platform :
 
 {code}
 
-Ce code expire dans {expiration_minutes} minutes.
-Si vous n'avez pas demande ce code, ignorez cet email.
+Ce code est personnel, a usage unique, et expire dans {expiration_minutes} minutes.
+Si vous n'etes pas a l'origine de cette demande, vous pouvez ignorer cet email.
 
 Cordialement,
-Validation App
+PIV Platform
 """
 
     html_content = f"""
 <!DOCTYPE html>
 <html>
-  <body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,sans-serif;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb;padding:30px 0;">
+  <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#172033;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f5f9;padding:32px 12px;">
       <tr>
         <td align="center">
-          <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;border:1px solid #e5e7eb;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid #dbe3ef;border-radius:14px;overflow:hidden;">
             <tr>
-              <td style="background:#2563eb;padding:20px 28px;color:#ffffff;">
-                <h1 style="margin:0;font-size:20px;">Validation App</h1>
-                <p style="margin:6px 0 0;font-size:14px;">Authentification OTP</p>
+              <td style="background:#14213d;padding:22px 30px;color:#ffffff;border-bottom:4px solid #2f6fed;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="52" valign="middle" style="width:52px;padding:0;">
+                      <table role="presentation" width="42" height="42" cellpadding="0" cellspacing="0" border="0" bgcolor="#2f6fed" style="width:42px;height:42px;background:#2f6fed;border-radius:10px;">
+                        <tr>
+                          <td align="center" valign="middle" height="42" style="height:42px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:42px;text-align:center;">PIV</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="middle" style="padding-left:12px;">
+                      <p style="margin:0;font-size:18px;font-weight:700;">PIV Platform</p>
+                      <p style="margin:4px 0 0;font-size:12px;color:#cbd5e1;">Connexion securisee</p>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
-              <td style="padding:28px;color:#1f2937;">
-                <p style="font-size:15px;margin:0 0 16px;">
-                  Bonjour <strong>{user.username or user.email}</strong>,
+              <td style="padding:32px 30px 28px;">
+                <p style="font-size:16px;margin:0 0 18px;color:#172033;">
+                  Bonjour <strong>{safe_recipient_name}</strong>,
                 </p>
-                <p style="font-size:15px;line-height:1.6;margin:0 0 18px;">
-                  Utilisez le code suivant pour vous connecter a Validation App.
+                <p style="font-size:15px;line-height:1.6;margin:0 0 22px;color:#475569;">
+                  Saisissez ce code dans l'application pour finaliser votre connexion.
                 </p>
-                <div style="font-size:32px;font-weight:700;letter-spacing:8px;text-align:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:18px;margin:18px 0;color:#111827;">
-                  {code}
-                </div>
-                <p style="font-size:13px;color:#6b7280;line-height:1.6;margin:0;">
-                  Ce code expire dans {expiration_minutes} minutes. Si vous n'avez pas demande ce code, ignorez cet email.
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;">
+                  <tr>
+                    <td align="center" style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:20px 12px;font-size:34px;font-weight:700;letter-spacing:10px;color:#14213d;">
+                      {code}
+                    </td>
+                  </tr>
+                </table>
+                <p style="font-size:13px;line-height:1.5;margin:0 0 22px;text-align:center;color:#64748b;">
+                  Code personnel &bull; Usage unique &bull; Valable {expiration_minutes} minutes
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="background:#fff7ed;border-left:4px solid #f59e0b;padding:13px 15px;color:#7c2d12;font-size:13px;line-height:1.5;">
+                      Vous n'avez pas demande ce code ? Ignorez simplement cet email et ne partagez le code avec personne.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 30px;text-align:center;">
+                <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;">
+                  Email automatique de PIV Platform &mdash; merci de ne pas repondre.
                 </p>
               </td>
             </tr>
@@ -200,11 +234,13 @@ Validation App
 </html>
 """
 
+    connection = get_connection(timeout=getattr(settings, "EMAIL_TIMEOUT", 5))
     email = EmailMultiAlternatives(
         subject=subject,
         body=text_content,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[user.email],
+        connection=connection,
     )
     email.attach_alternative(html_content, "text/html")
     email.send(fail_silently=False)

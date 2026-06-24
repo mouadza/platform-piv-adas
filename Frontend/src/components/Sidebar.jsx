@@ -25,7 +25,7 @@ const roleConfig = {
       { icon: FolderKanban, label: "Projets", path: "/listeprojet" },
       { icon: FileSpreadsheet, label: "Gammes", path: "/listegammes" },
       { icon: Settings, label: "Paramétrages", path: "/configurations" },
-      // { icon: History, label: "Audit logs", path: "/audit-logs" },
+      { icon: History, label: "Audit logs", path: "/audit-logs" },
     ],
   },
 

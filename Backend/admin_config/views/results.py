@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 
 from admin_config.models.gamme import Gamme
 from admin_config.models.results import StepValidation
@@ -69,6 +70,11 @@ def compute_gamme_result(ev_results):
 
     return "IN_PROGRESS"
 
+@extend_schema(
+    tags=["Validations"],
+    summary="Dernieres validations d'une gamme",
+    description="Retourne la derniere cotation connue pour chaque EV/step d'une gamme.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def latest_gamme_step_validations(request, gamme_id):
@@ -87,6 +93,11 @@ def latest_gamme_step_validations(request, gamme_id):
     serializer = StepValidationSerializer(latest_validations, many=True)
     return Response(serializer.data)
 
+@extend_schema(
+    tags=["KPI"],
+    summary="Resultats EV d'une gamme",
+    description="Calcule les resultats EV globaux d'une gamme a partir des cotations.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def gamme_results(request, gamme_id):
