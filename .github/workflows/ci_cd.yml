@@ -1,0 +1,107 @@
+name : CI Validation Platform
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+
+jobs:
+  backend-test:
+    name: Tests du Backend Django
+    runs-on: ubuntu-Latest
+
+  env:
+    DJANGO_DEBUG: "true"
+    DJANGO_SECRET_KEY: "temporary-ci-secret-key"
+    DB6ENGINE: "sqlite3"
+    SQLITE_NAME: "ci.sqlite3"
+    EMAIL_BACKEND: "django.core.mail.backends.locmem.EmailBackend"
+  
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Installer Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+      cache: pip
+      cache-dependency-path: Backend/requirements.txt
+
+    - name: Installer les dépendances Python
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+
+    - name: Vérifier Django
+      working-directory: Backend
+      run: python manage.py check
+
+    - name: Vérifier Les migrations
+      working-directory: Backend
+      run: python manage.py makemigrations --check --dry-run
+
+    - name: Lancer les tests unitaires
+      working-directory: Backend
+      run: python manage.py test validation_core.tests
+
+  frontend-test:
+    name: Tests et build du frontend React
+    runs-on: ubuntu-Latest
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Installer les dépendances du frontend
+        working-directory: Frontend
+        run: npm ci
+
+      - name: Vérifier le code avec ESLint
+        working-directory: Frontend
+        run: npm run lint
+
+      - name: Exécuter les tests frontend
+        working-directory: Frontend
+        run: npm test
+
+      - name: Construire Le frontend
+        working-directory: Frontend
+        run: npm run build
+    
+    docker-build:
+      name: Vérification des images Docker
+      runs-on: ubuntu-Latest
+
+      needs: 
+        - backend-test
+        - frontend-test
+      
+      steps:
+        - name: Récupérer le code
+          uses: actions/checkout@v4
+
+        - name: Construire l'image Backend
+          run: docker build -t validation-backend:ci ./Backend
+
+        - name: Construire l'image frontend
+          run: docker build --build-arg VITE_API_URL=/ -t validation-frontend:ci ./Frontend
+
+

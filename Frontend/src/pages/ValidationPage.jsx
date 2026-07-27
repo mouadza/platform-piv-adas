@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import BlocNavigation from "../components/BlocNavigation";
 import DashboardLayout from "../components/DashboardLayout";
 import BlocCardList from "../components/BlocCardList";
-import CommentairesSection from "../components/CommentairesSection";
 import { gammesAPI, validationsAPI } from "../api/index";
 import { downloadModifiedGammeExcel } from "../utils/modifiedGammeExcelDownload";
 
@@ -503,96 +502,93 @@ const gammeStatus = getGammeStatus();
 const canDownloadModifiedExcel = Boolean(gamme) && gammeStatus === "COMPLETED";
 
   return (
-    <DashboardLayout role={userRole}>
-      <div className="mb-5 bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            Statut de la gamme
-          </p>
-
-          <h3 className="text-sm font-bold text-slate-800 mt-1">
-            {gammeName}
-          </h3>
-        </div>
-        
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleDownloadModifiedExcel}
-            disabled={!canDownloadModifiedExcel || downloadingExcel}
-            title={
-              canDownloadModifiedExcel
-                ? "Télécharger le fichier Excel modifié"
-                : "Tous les EV doivent être validés"
-            }
-            className="px-4 py-2 rounded-xl bg-indigo-100 text-indigo-700 text-xs font-bold hover:bg-indigo-200 transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <Download size={15} />
-            {downloadingExcel ? "Generation..." : "Excel modifie"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate(`/validation-report/${gammeId}`)}
-            className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900 transition-colors"
-          >
-            Rapport temps réel
-          </button>
-
-          <span
-            className={`px-3 py-1 rounded-full border text-xs font-bold ${getGammeStatusClass(
-              gammeStatus
-            )}`}
-          >
-            {getGammeStatusLabel(gammeStatus)}
-          </span>
-        </div>
-      </div>
-      {currentEVCode && (
-        <div className="mb-5 bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Résultat EV
+    <DashboardLayout
+      role={userRole}
+      contentClassName="h-full min-h-0 py-3 pb-20 md:pb-3 lg:py-3"
+    >
+      <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-2">
+        <div className="flex min-h-0 flex-col gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Statut de la gamme
             </p>
 
-            <h3 className="text-sm font-bold text-slate-800 mt-1">
-              {currentEVCode}
+            <h3 className="mt-0.5 truncate text-base font-extrabold text-slate-900">
+              {gammeName}
             </h3>
           </div>
 
-          <span
-            className={`px-3 py-1 rounded-full border text-xs font-bold ${
-              getResultBadgeClass(currentEVResult)
-            }`}
-          >
-            {currentEVResult || "IN_PROGRESS"}
-          </span>
-        </div>
-      )}
-      {blocs.length > 0 && (
-        <>
-          <BlocNavigation
-            blocs={blocs}
-            currentBlocIndex={currentBlocIndex}
-            setCurrentBlocIndex={setCurrentBlocIndex}
-            gammeValidee={gammeValidee}
-            onNext={handleNextBloc}
-            onPrev={handlePrevBloc}
-            onFinish={handleFinish}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            {currentEVCode && (
+              <span
+                className={`rounded-full border px-3 py-1.5 text-xs font-bold ${getResultBadgeClass(
+                  currentEVResult
+                )}`}
+              >
+                {currentEVCode} : {currentEVResult || "IN_PROGRESS"}
+              </span>
+            )}
 
-          <BlocCardList
-            gammeId={gammeId}
-            bloc={blocs[currentBlocIndex]}
-            colonnes={colonnes}
-            onToggleChange={handleToggleChange}
-            onSelectChange={handleSelectChange}
-            disabled={isReadOnly}
-            readOnly={isReadOnly}
-          />
-        </>
-      )}
+            <span
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold ${getGammeStatusClass(
+                gammeStatus
+              )}`}
+            >
+              {getGammeStatusLabel(gammeStatus)}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleDownloadModifiedExcel}
+              disabled={!canDownloadModifiedExcel || downloadingExcel}
+              title={
+                canDownloadModifiedExcel
+                  ? "Télécharger le fichier Excel modifié"
+                  : "Tous les EV doivent être validés"
+              }
+              className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#243782] px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#00133B] hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+            >
+              <Download size={15} />
+              {downloadingExcel ? "Génération..." : "Excel modifié"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/validation-report/${gammeId}`)}
+              className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#00133B] px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#243782] hover:shadow-md active:translate-y-0"
+            >
+              <FileText size={15} />
+              Rapport temps réel
+            </button>
+          </div>
+        </div>
+
+        {blocs.length > 0 && (
+          <>
+            <BlocNavigation
+              blocs={blocs}
+              currentBlocIndex={currentBlocIndex}
+              setCurrentBlocIndex={setCurrentBlocIndex}
+              gammeValidee={gammeValidee}
+              onNext={handleNextBloc}
+              onPrev={handlePrevBloc}
+              onFinish={handleFinish}
+              compact
+            />
+
+            <BlocCardList
+              gammeId={gammeId}
+              bloc={blocs[currentBlocIndex]}
+              colonnes={colonnes}
+              onToggleChange={handleToggleChange}
+              onSelectChange={handleSelectChange}
+              disabled={isReadOnly}
+              readOnly={isReadOnly}
+              compact
+            />
+          </>
+        )}
+      </div>
     </DashboardLayout>
   );
 };

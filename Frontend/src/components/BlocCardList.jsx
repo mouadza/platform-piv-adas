@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Eye, MessageSquare } from "lucide-react";
 import CommentairesSection from "../components/CommentairesSection";
 import { validationsAPI, measuredResultCommentsAPI } from "../api/index";
 
@@ -35,6 +36,7 @@ const BlocCardList = ({
   onSelectChange,
   disabled,
   readOnly = false,
+  compact = false,
 }) => {
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -393,16 +395,20 @@ const BlocCardList = ({
 
   const renderCell = (cell, colIndex, rowIndex) => {
     const borderCls = "border-r border-black/10 last:border-r-0";
+    const cellPad = compact ? "px-1.5 py-1" : "px-2 py-2";
+    const cotationPad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
+    const textSize = compact ? "text-[11px]" : "text-xs";
 
     if (cell.field === "Cotation (Résultats)") {
       return (
-        <td key={colIndex} className={`px-2 py-1.5 ${borderCls}`}>
+        <td key={colIndex} className={`${cotationPad} ${borderCls}`}>
           {cell.type === "select" ? (
             <CotationSelect
               cell={cell}
               rowIndex={rowIndex}
               disabled={disabled}
               onPendingChange={handlePendingChange}
+              compact={compact}
             />
           ) : (
             <span className="text-slate-300 text-xs select-none">—</span>
@@ -423,9 +429,9 @@ const BlocCardList = ({
       const lastComment = hasComments ? rowComments[0] : null;
 
       return (
-        <td key={colIndex} className={`px-2 py-2 ${borderCls}`}>
+        <td key={colIndex} className={`${cellPad} ${borderCls}`}>
           <div className="flex flex-col gap-1.5">
-            <span className="line-clamp-2 leading-relaxed text-xs text-slate-800 font-semibold">
+            <span className={`line-clamp-2 leading-relaxed ${textSize} text-slate-800 font-semibold`}>
               {cell.value || ""}
             </span>
 
@@ -447,13 +453,18 @@ const BlocCardList = ({
                       ? "Voir tous les commentaires"
                       : "Ajouter ou consulter les commentaires"
                   }
-                  className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-sm transition-colors hover:bg-slate-200"
-                  style={{
-                    backgroundColor: readOnly ? "#f1f5f9" : "#eef2ff",
-                    color: readOnly ? "#64748b" : "#4f46e5",
-                  }}
+                  className={`flex-shrink-0 rounded-md border text-[10px] font-bold transition hover:-translate-y-0.5 ${
+                    compact
+                      ? "flex h-7 w-7 items-center justify-center"
+                      : "inline-flex h-7 items-center gap-1 px-2"
+                  } ${
+                    readOnly
+                      ? "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                      : "border-[#243782]/20 bg-[#243782]/10 text-[#243782] hover:bg-[#243782]/15"
+                  }`}
                 >
-                  {readOnly ? "👁️" : "💬"}
+                  {readOnly ? <Eye size={13} /> : <MessageSquare size={13} />}
+                  {!compact && <span>{readOnly ? "Voir" : "Commenter"}</span>}
                 </button>
               </div>
             )}
@@ -464,7 +475,7 @@ const BlocCardList = ({
 
     if (isEtatField(cell.field)) {
       return (
-        <td key={colIndex} className={`px-2 py-2 ${borderCls} whitespace-nowrap`}>
+        <td key={colIndex} className={`${cellPad} ${borderCls} whitespace-nowrap`}>
           <StatusBadge value={cell.value} />
         </td>
       );
@@ -474,7 +485,7 @@ const BlocCardList = ({
       return (
         <td
           key={colIndex}
-          className={`px-2 py-2 ${borderCls} font-mono text-[11px] text-slate-700 whitespace-nowrap`}
+          className={`${cellPad} ${borderCls} font-mono text-[11px] text-slate-700 whitespace-nowrap`}
         >
           {cell.value}
         </td>
@@ -489,7 +500,7 @@ const BlocCardList = ({
       const historyComment = historyCommentsByStep[stepKey];
 
       return (
-        <td key={colIndex} className={`px-2 py-2 ${borderCls}`}>
+        <td key={colIndex} className={`${cellPad} ${borderCls}`}>
           <div className="flex items-center gap-2">
             {hasCotation ? (
               <>
@@ -503,9 +514,14 @@ const BlocCardList = ({
                 <button
                   type="button"
                   onClick={() => openHistory(rowIndex)}
-                  className="flex-shrink-0 px-3 py-1.5 text-[10px] font-bold rounded-md bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 transition-colors whitespace-nowrap"
+                  className={`flex-shrink-0 rounded-md border border-[#243782]/20 bg-white text-[10px] font-bold text-[#243782] transition hover:-translate-y-0.5 hover:bg-[#243782]/10 ${
+                    compact
+                      ? "flex h-7 w-7 items-center justify-center"
+                      : "inline-flex items-center gap-1 px-3 py-1.5"
+                  }`}
                 >
-                  💬
+                  <MessageSquare size={13} />
+                  {!compact && <span>Historique</span>}
                 </button>
               </>
             ) : (
@@ -519,9 +535,9 @@ const BlocCardList = ({
     return (
       <td
         key={colIndex}
-        className={`px-2 py-2 text-slate-800 ${borderCls} max-w-[220px]`}
+        className={`${cellPad} text-slate-800 ${borderCls} ${compact ? "max-w-none" : "max-w-[220px]"}`}
       >
-        <span className="line-clamp-3 leading-relaxed text-xs">
+        <span className={`${compact ? "line-clamp-2" : "line-clamp-3"} leading-relaxed ${textSize}`}>
           {cell.value || ""}
         </span>
       </td>
@@ -533,28 +549,33 @@ const BlocCardList = ({
   if (!bloc) return null;
 
   return (
-    <div className="relative">
-      <div className="mt-4">
+    <div className="relative flex h-full min-h-0 flex-col">
+      <div className={compact ? "mb-2 h-[190px] rounded-lg" : "mt-4"}>
         <CommentairesSection
           gammeId={gammeId}
           evCode={getEVCode()}
           mode="ev"
           title="Commentaire général EV"
           readOnly={readOnly}
+          compact={compact}
         />
       </div>
 
-      <div className="w-full overflow-x-auto rounded-xl shadow border border-slate-300 bg-white mt-4">
+      <div
+        className={`w-full rounded-lg border border-slate-300 bg-white shadow-sm ${
+          compact ? "min-h-0 flex-1 overflow-auto" : "mt-4 overflow-x-auto"
+        }`}
+      >
         <table
-          className="w-full text-xs border-collapse"
-          style={{ minWidth: "900px" }}
+          className={`w-full border-collapse text-xs ${compact ? "table-fixed" : ""}`}
+          style={{ minWidth: compact ? "100%" : "900px" }}
         >
           <thead>
             <tr className="bg-slate-700 text-white sticky top-0 z-20">
               {colonnes?.map((col, i) => (
                 <th
                   key={i}
-                  className="px-2 py-2.5 text-left font-bold uppercase tracking-wide text-[10px] whitespace-nowrap border-r border-slate-600 last:border-r-0"
+                  className={`${compact ? "px-1.5 py-2" : "px-2 py-2.5"} border-r border-slate-600 text-left text-[10px] font-bold uppercase tracking-wide last:border-r-0`}
                 >
                   {col}
                 </th>
@@ -573,7 +594,7 @@ const BlocCardList = ({
                 {bloc.ev_row.map((cell, i) => (
                   <td
                     key={i}
-                    className="px-2 py-2.5 border-r last:border-r-0 font-bold text-sm"
+                    className={`${compact ? "px-1.5 py-1.5 text-xs" : "px-2 py-2.5 text-sm"} border-r font-bold last:border-r-0`}
                     style={{ borderColor: ROW_BORDER.ev }}
                   >
                     {isEtatField(cell.field) ? (
@@ -598,7 +619,7 @@ const BlocCardList = ({
                     backgroundColor: bg,
                     borderBottom: `1px solid ${border}`,
                   }}
-                  className="transition-colors duration-100"
+                  className="transition-colors duration-100 hover:brightness-[0.98]"
                 >
                   {cells.map((cell, colIndex) =>
                     renderCell(cell, colIndex, rowIndex)

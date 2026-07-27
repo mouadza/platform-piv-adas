@@ -115,11 +115,11 @@ const GammeForm = ({
   const data = err?.data || err?.response?.data;
 
   if (data?.duplicates_in_db?.length > 0) {
-    return `Ce fichier est déjà importé dans ce projet : ${data.duplicates_in_db.join(", ")}`;
+    return `Ce fichier est déjà  importé dans ce projet : ${data.duplicates_in_db.join(", ")}`;
   }
 
   if (data?.duplicates_in_request?.length > 0) {
-    return `Fichier(s) dupliqué(s) dans la sélection : ${data.duplicates_in_request.join(", ")}`;
+    return `Fichier(s) dupliqués dans la sélection : ${data.duplicates_in_request.join(", ")}`;
   }
 
   if (data?.detail) {
@@ -140,7 +140,7 @@ const GammeForm = ({
 
     if (duplicates.length > 0) {
       setError(
-        `Fichier(s) déjà sélectionné(s) : ${duplicates.join(", ")}`
+        `Fichier(s) déjà sélectionnés : ${duplicates.join(", ")}`
       );
     } else {
       setError("");
@@ -156,7 +156,7 @@ const GammeForm = ({
 
   if (duplicates.length > 0) {
     setError(
-      `Import impossible. Fichier(s) dupliqué(s) : ${duplicates.join(", ")}`
+      `Import impossible. Fichier(s) dupliqués : ${duplicates.join(", ")}`
     );
     return;
   }
@@ -172,19 +172,13 @@ const GammeForm = ({
     formData.append("projet", projet.id);
   }
 
-  /**
-   * Champs metadata
-   * En création multiple :
-   * - si plusieurs fichiers, tu peux envoyer les champs cochés seulement
-   * - si un seul fichier, tu peux envoyer tous les champs remplis
-   */
   Object.keys(checkedFields).forEach((key) => {
     if (key === "vehicules") return;
 
     const value = form[key];
 
     if (value !== undefined && value !== null && value !== "") {
-      // Si plusieurs gammes, appliquer seulement les champs cochés
+
       if (multipleGammes && !isEditing) {
         if (checkedFields[key]) {
           formData.append(key, value);
@@ -195,9 +189,8 @@ const GammeForm = ({
     }
   });
 
-  /**
-   * Fichiers gamme
-   */
+
+
   if (isEditing) {
     if (fichierGamme.length > 0) {
       formData.append("fichierGamme", fichierGamme[0]);
@@ -240,14 +233,14 @@ const GammeForm = ({
 
   return (
     <div className="w-full px-3 sm:px-4 md:px-8 lg:px-16 xl:px-28 py-4 sm:py-6 md:py-8">
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm p-4 sm:p-6 md:p-8 lg:p-10">
+      <div className="bg-white rounded-lg sm:rounded-lg shadow-sm p-4 sm:p-6 md:p-8 lg:p-10">
 
         {projet && (
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 line-clamp-2">
               {projet.nom_projet}
             </h1>
-            <span className="self-start sm:self-auto bg-blue-600/10 text-blue-700 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">
+            <span className="self-start sm:self-auto bg-[#243782]/10 text-[#243782] px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">
               ID: {projet.id}
             </span>
           </div>
@@ -284,7 +277,7 @@ const GammeForm = ({
 
             {/* Hint when multiple files — seulement en création */}
             {multipleGammes && !isEditing && (
-              <div className="mb-4 bg-blue-50 border border-blue-100 text-blue-700 text-xs px-3 py-2 rounded-lg">
+              <div className="mb-4 bg-[#243782]/10 border border-[#243782]/15 text-[#243782] text-xs px-3 py-2 rounded-lg">
                 ℹ️ Cochez les champs à appliquer à toutes les gammes importées.
               </div>
             )}
@@ -467,7 +460,7 @@ const GammeForm = ({
           <button
             type="button"
             onClick={handleSubmit}
-            className="bg-blue-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all duration-300 active:scale-95"
+            className="bg-[#243782] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:bg-[#00133B] hover:shadow-lg hover:shadow-[#243782]/20 transition-all duration-300 active:scale-95"
           >
             {title}
           </button>
@@ -488,7 +481,7 @@ const FieldRow = ({ label, checked, onToggle, showCheckbox, children }) => (
         title={`Appliquer "${label}" à toutes les gammes importées`}
         className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2.5 rounded-lg cursor-pointer transition-all duration-200 border whitespace-nowrap text-xs sm:text-sm ${
           checked
-            ? "bg-blue-50 border-blue-200 shadow-sm"
+            ? "bg-[#243782]/10 border-[#243782]/25 shadow-sm"
             : "bg-slate-50 border-slate-200 hover:bg-slate-100"
         }`}
       >
@@ -496,7 +489,7 @@ const FieldRow = ({ label, checked, onToggle, showCheckbox, children }) => (
           type="checkbox"
           checked={checked}
           onChange={onToggle}
-          className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-transform duration-200 hover:scale-110 accent-blue-600"
+          className="w-4 h-4 text-[#243782] bg-white border-slate-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-transform duration-200 hover:scale-110 accent-blue-600"
         />
         <span
           className={`font-medium select-none transition-colors ${
@@ -511,3 +504,5 @@ const FieldRow = ({ label, checked, onToggle, showCheckbox, children }) => (
 );
 
 export default GammeForm;
+
+

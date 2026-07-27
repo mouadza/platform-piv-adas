@@ -60,7 +60,7 @@ const ModifierGamme = () => {
       <div className="mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="text-blue-600 text-sm font-semibold hover:underline"
+          className="text-[#243782] text-sm font-semibold hover:underline"
         >
           ← Retour
         </button>
@@ -86,3 +86,4 @@ const ModifierGamme = () => {
 };
 
 export default ModifierGamme;
+

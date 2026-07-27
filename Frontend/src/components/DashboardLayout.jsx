@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, Menu, UserCircle, X } from "lucide-react";
+import { ChevronDown, UserCircle } from "lucide-react";
 
 import Sidebar from "./Sidebar";
+import NotificationBell from "./NotificationBell";
 import {
   ROLE_ROUTES,
   getAccessRoles,
@@ -13,7 +14,7 @@ import {
 } from "../utils/roles";
 
 const ROLE_STYLES = {
-  ADMIN: "bg-blue-50 text-blue-700 ring-blue-100",
+  ADMIN: "bg-[#243782]/10 text-[#edf3fc] ring-[#243782]/15",
   PPL: "bg-violet-50 text-violet-700 ring-violet-100",
   VALIDEUR: "bg-emerald-50 text-emerald-700 ring-emerald-100",
   VISITEUR: "bg-slate-100 text-slate-700 ring-slate-200",
@@ -58,8 +59,8 @@ const PAGE_META = [
       path.includes("Gamme") ||
       path.includes("gamme") ||
       path.includes("visualiser"),
-    title: "Gammes",
-    subtitle: "Import, organisation, consultation et export des gammes.",
+    title: "Gammes de validation",
+    subtitle: "Consultation, planification et suivi des gammes par projet.",
   },
   {
     match: (path) => path.includes("validation"),
@@ -78,18 +79,16 @@ const PAGE_META = [
   },
 ];
 
-const getPageMeta = (pathname) =>
-  PAGE_META.find((item) => item.match(pathname)) || {
-    title: "Validation App",
-    subtitle: "Plateforme de suivi et validation des gammes.",
-  };
-
-const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
+const DashboardLayout = ({
+  role = "VISITEUR",
+  activePath,
+  contentClassName = "",
+  children,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const popoverRef = useRef(null);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const [selectedRole, setSelectedRole] = useState(() =>
@@ -104,7 +103,6 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
   }, [role]);
 
   const user = useMemo(() => getTokenPayload(), []);
-  const pageMeta = getPageMeta(location.pathname);
 
   useEffect(() => {
     const storedRole = getStoredActiveRole(role);
@@ -141,56 +139,39 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
   const roleClass =
     ROLE_STYLES[selectedRole] || "bg-slate-100 text-slate-700 ring-slate-200";
   const displayName = user?.username || user?.email || "Utilisateur";
+  const pageMeta =
+    PAGE_META.find((item) => item.match(location.pathname)) || {
+      title: "Validation App",
+      subtitle: "Plateforme de suivi et validation des gammes.",
+    };
 
   return (
-    <div className="app-shell flex h-screen w-screen overflow-hidden bg-[#f5f7fb] text-slate-900">
-      {sidebarOpen && (
-        <button
-          type="button"
-          className="fixed inset-0 z-30 bg-slate-950/45 md:hidden"
-          aria-label="Fermer le menu"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <div
-        className={`fixed md:relative z-40 h-full transform transition-transform duration-300 ease-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
-      >
+    <div className="app-shell flex h-screen w-screen overflow-hidden bg-[#00133B] text-slate-900">
+      <div className="relative z-40 hidden h-full shrink-0 md:block">
         <Sidebar
           role={sidebarRole}
           activePath={activePath}
-          onClose={() => setSidebarOpen(false)}
         />
       </div>
+      <Sidebar role={sidebarRole} activePath={activePath} variant="mobile" />
 
       <main className="min-w-0 flex-1 flex flex-col overflow-hidden">
-        <header className="h-[72px] shrink-0 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 h-[72px] shrink-0 border-b border-[#243782]/70 bg-[linear-gradient(90deg,#00133B_0%,#071C58_58%,#243782_100%)] px-4 text-white shadow-[0_12px_28px_rgba(0,19,59,0.18)] sm:px-6 lg:px-8">
           <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setSidebarOpen((value) => !value)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700 md:hidden"
-                aria-label="Ouvrir le menu"
-              >
-                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-
-              <div className="min-w-0">
-                <h1 className="truncate text-lg font-bold tracking-tight text-slate-950 sm:text-xl">
-                  {pageMeta.title}
-                </h1>
-                <p className="hidden truncate text-sm text-slate-500 sm:block">
-                  {pageMeta.subtitle}
-                </p>
-              </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-lg font-extrabold tracking-tight text-white sm:text-xl">
+                {pageMeta.title}
+              </h1>
+              <p className="hidden truncate text-sm text-blue-100/75 sm:block">
+                {pageMeta.subtitle}
+              </p>
             </div>
 
             <div className="flex shrink-0 items-center gap-3">
-              <div className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 lg:flex">
-                <UserCircle size={18} className="text-slate-400" />
+              <NotificationBell />
+
+              <div className="hidden items-center gap-2 rounded-lg border border-white/15 bg-[#243782]/60 px-3 py-2 text-sm text-white/85 lg:flex">
+                <UserCircle size={18} className="text-white/60" />
                 <span className="max-w-[180px] truncate font-medium">
                   {displayName}
                 </span>
@@ -202,7 +183,7 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
                     <button
                       type="button"
                       onClick={() => setRoleMenuOpen((value) => !value)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-[#243782]/70 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#243782]"
                     >
                       <span
                         className={`rounded-md px-2 py-1 text-xs font-bold ring-1 ${roleClass}`}
@@ -211,7 +192,7 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
                       </span>
                       <ChevronDown
                         size={16}
-                        className={`text-slate-400 transition-transform ${
+                        className={`text-white/60 transition-transform ${
                           roleMenuOpen ? "rotate-180" : ""
                         }`}
                       />
@@ -242,7 +223,7 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
                                 className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition ${
                                   isActive
                                     ? "cursor-default bg-slate-50 text-slate-400"
-                                    : "text-slate-700 hover:bg-blue-50"
+                                    : "text-slate-700 hover:bg-[#243782]/10"
                                 }`}
                               >
                                 <span
@@ -274,8 +255,10 @@ const DashboardLayout = ({ role = "VISITEUR", activePath, children }) => {
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50 custom-scrollbar">
+          <div
+            className={`mx-auto w-full max-w-[1600px] px-4 py-5 pb-24 sm:px-6 md:pb-7 lg:px-8 lg:py-7 ${contentClassName}`}
+          >
             {children}
           </div>
         </div>

@@ -85,7 +85,7 @@ const LoginPage = () => {
     <BackgroundImage>
       <div className="relative z-10 w-full max-w-[520px] px-3">
         <div className="relative z-10 w-full rounded-xl bg-black/10 p-10 shadow-lg backdrop-blur-md">
-          <h1 className="mb-6 text-center text-3xl font-bold text-white">
+          <h1 className="mb-6 text-center text-3xl font-extrabold tracking-tight text-white">
             Connexion
           </h1>
 
@@ -103,15 +103,15 @@ const LoginPage = () => {
       </div>
 
       {noAffectationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <div className="modal-backdrop">
+          <div className="modal-sheet sm:max-w-md">
             <div className="flex items-center justify-between border-b border-amber-100 bg-amber-50 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
                   <AlertTriangle size={20} />
                 </div>
 
-                <h2 className="text-lg font-bold text-amber-800">
+                <h2 className="text-lg font-extrabold text-amber-800">
                   Acces non autorise
                 </h2>
               </div>
@@ -142,7 +142,7 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={closeNoAffectationModal}
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-900"
+                className="rounded-lg bg-[#243782] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#00133B]"
               >
                 Compris
               </button>
@@ -155,3 +155,6 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+
+

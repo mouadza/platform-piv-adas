@@ -1,6 +1,6 @@
 projectKey=Validation-Platform
 serverUrl=http://localhost:9000
-serverVersion=26.6.0.123539
+serverVersion=26.7.0.124771
 dashboardUrl=http://localhost:9000/dashboard?id=Validation-Platform
-ceTaskId=9989337d-581b-436f-a283-dd3d721aeaee
-ceTaskUrl=http://localhost:9000/api/ce/task?id=9989337d-581b-436f-a283-dd3d721aeaee
+ceTaskId=bea7fe0e-416f-4331-8718-ec9e9f115f71
+ceTaskUrl=http://localhost:9000/api/ce/task?id=bea7fe0e-416f-4331-8718-ec9e9f115f71

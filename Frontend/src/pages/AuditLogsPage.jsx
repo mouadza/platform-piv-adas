@@ -203,7 +203,7 @@ const AuditLogsPage = () => {
       <div className="space-y-5">
         <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-md bg-[#243782]/10 px-3 py-1 text-xs font-bold text-[#243782]">
               <ShieldCheck size={15} />
               Journal de securite
             </div>
@@ -222,7 +222,7 @@ const AuditLogsPage = () => {
               disabled={loading}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
             >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              <RefreshCw size={16} />
               Actualiser
             </button>
 
@@ -230,7 +230,7 @@ const AuditLogsPage = () => {
               type="button"
               onClick={exportCsv}
               disabled={filteredLogs.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#243782] px-3 py-2 text-sm font-bold text-white transition hover:bg-[#00133B] disabled:opacity-60"
             >
               <Download size={16} />
               Export CSV
@@ -248,7 +248,7 @@ const AuditLogsPage = () => {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Rechercher par utilisateur, action, gamme, IP..."
-              className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-[#243782]/15"
             />
           </label>
 
@@ -260,7 +260,7 @@ const AuditLogsPage = () => {
             <select
               value={action}
               onChange={(event) => setAction(event.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-[#243782]/15"
             >
               {ACTION_GROUPS.map((item) => (
                 <option key={item.value} value={item.value}>
@@ -273,7 +273,7 @@ const AuditLogsPage = () => {
           <select
             value={entityType}
             onChange={(event) => setEntityType(event.target.value)}
-            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-[#243782]/15"
           >
             {ENTITY_TYPES.map((item) => (
               <option key={item.value} value={item.value}>
@@ -293,15 +293,19 @@ const AuditLogsPage = () => {
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <Activity size={17} className="text-blue-600" />
+              <Activity size={17} className="text-[#243782]" />
               {filteredLogs.length} trace(s)
             </div>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center gap-3 py-16 text-sm font-medium text-slate-500">
-              <RefreshCw size={20} className="animate-spin text-blue-600" />
-              Chargement des traces...
+            <div className="space-y-3 p-4">
+              {[0, 1, 2, 3, 4].map((item) => (
+                <div
+                  key={item}
+                  className="h-14 animate-pulse rounded-lg border border-slate-200 bg-slate-100"
+                />
+              ))}
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -316,7 +320,7 @@ const AuditLogsPage = () => {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                <thead className="bg-[#00133B] text-xs uppercase text-white">
                   <tr>
                     <th className="whitespace-nowrap px-4 py-3 text-left font-bold">
                       Date
@@ -346,7 +350,7 @@ const AuditLogsPage = () => {
                         {formatDate(log.created_at)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
-                        <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">
+                        <span className="rounded-md bg-[#243782]/10 px-2 py-1 text-xs font-bold text-[#243782]">
                           {getActionLabel(log.action)}
                         </span>
                       </td>
@@ -397,3 +401,5 @@ const AuditLogsPage = () => {
 };
 
 export default AuditLogsPage;
+
+

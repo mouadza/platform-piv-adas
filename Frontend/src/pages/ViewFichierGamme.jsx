@@ -6,6 +6,8 @@ import { API_BASE_URL, gammesAPI } from "../api/index";
 
 const BASE_URL = `${API_BASE_URL}/admin_config`;
 
+import {Search} from "lucide-react";
+
 const ViewFichierGamme = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ const ViewFichierGamme = () => {
     loadExcel();
   }, [gamme]);
 
-  // 3. Mettre à jour le tableau quand on change d'onglet
+  // 3. Mettre à  jour le tableau quand on change d'onglet
   useEffect(() => {
     if (!workbook || !activeSheet) return;
 
@@ -92,7 +94,7 @@ const ViewFichierGamme = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-blue-600 text-sm font-semibold hover:underline w-fit"
+            className="flex items-center gap-1.5 text-[#243782] text-sm font-semibold hover:underline w-fit"
           >
             ← Retour
           </button>
@@ -100,13 +102,13 @@ const ViewFichierGamme = () => {
           <a
             href={`${BASE_URL}${gamme?.fichier_gamme}`}
             download
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors w-fit"
+            className="flex items-center gap-2 bg-[#243782] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#00133B] transition-colors w-fit"
           >
             ⬇️ Télécharger
           </a>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm p-4 sm:p-6 md:p-8">
+        <div className="app-panel">
 
           {/* Titre */}
           <div className="mb-6">
@@ -123,8 +125,8 @@ const ViewFichierGamme = () => {
           {/* États */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
-              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-              <p className="text-sm italic">Chargement du fichier…</p>
+              <div className="h-16 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+              <p className="text-sm italic">Chargement du fichier...</p>
             </div>
           )}
 
@@ -145,7 +147,7 @@ const ViewFichierGamme = () => {
                       onClick={() => { setActiveSheet(sheet); setSearch(""); }}
                       className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                         activeSheet === sheet
-                          ? "bg-blue-600 text-white"
+                          ? "bg-[#243782] text-white"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                     >
@@ -157,10 +159,12 @@ const ViewFichierGamme = () => {
 
               {/* Barre de recherche */}
               <div className="relative mb-4">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+                  <Search size={16} />
+                </span>
                 <input
                   type="text"
-                  placeholder="Rechercher dans le tableau…"
+                  placeholder="Rechercher dans le tableau..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -170,7 +174,7 @@ const ViewFichierGamme = () => {
                     onClick={() => setSearch("")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
                   >
-                    ✕
+                    x
                   </button>
                 )}
               </div>
@@ -189,7 +193,7 @@ const ViewFichierGamme = () => {
               ) : (
                 <div className="overflow-x-auto rounded-xl border">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-slate-50 text-slate-600 uppercase text-xs">
+                    <thead className="bg-[#00133B] text-white uppercase text-xs">
                       <tr>
                         {tableData.headers.map((h, i) => (
                           <th
@@ -241,3 +245,7 @@ const ViewFichierGamme = () => {
 };
 
 export default ViewFichierGamme;
+
+
+
+

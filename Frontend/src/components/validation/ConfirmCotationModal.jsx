@@ -34,10 +34,10 @@ const ConfirmCotationModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-[420px] overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-          <h3 className="text-sm font-bold text-slate-800">
+    <div className="modal-backdrop">
+      <div className="modal-sheet sm:max-w-[420px]">
+        <div className="border-b border-slate-100 bg-white px-5 py-4">
+          <h3 className="text-sm font-extrabold text-slate-900">
             Confirmer la modification
           </h3>
         </div>
@@ -51,7 +51,7 @@ const ConfirmCotationModal = ({
             {confirmModal.stepCode}
           </p>
 
-          <div className="flex items-center justify-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+          <div className="mb-4 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <div className="flex items-center gap-1.5 opacity-60 line-through">
               <span
                 className="w-2.5 h-2.5 rounded-sm"
@@ -99,21 +99,21 @@ const ConfirmCotationModal = ({
                 ? "Commentaire facultatif..."
                 : "Commentaire obligatoire..."
             }
-            className="w-full min-h-[90px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full min-h-[96px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
           />
         </div>
 
-        <div className="px-5 py-4 flex justify-end gap-3 bg-slate-50 border-t border-slate-100">
+        <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
           <button
             onClick={closeModal}
-            className="px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 hover:text-slate-900"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
           >
             Annuler
           </button>
 
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 shadow-sm"
+            className="rounded-lg bg-[#243782] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#00133B]"
           >
             Confirmer
           </button>
@@ -124,3 +124,5 @@ const ConfirmCotationModal = ({
 };
 
 export default ConfirmCotationModal;
+
+

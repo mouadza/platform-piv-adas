@@ -17,10 +17,10 @@ const COLOR_MAP = {
   blue: {
     border: "border-blue-300",
     borderActive: "border-blue-500",
-    bg: "bg-blue-50",
-    bgActive: "bg-blue-100",
-    text: "text-blue-600",
-    badge: "bg-blue-100 text-blue-700",
+    bg: "bg-[#243782]/10",
+    bgActive: "bg-[#243782]/15",
+    text: "text-[#243782]",
+    badge: "bg-[#243782]/15 text-[#243782]",
     icon: "text-blue-400",
   },
   green: {
@@ -150,7 +150,7 @@ const FileDropZone = ({
                     className="p-1 rounded-full hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors"
                     title="Supprimer"
                   >
-                    ✕
+                    x
                   </button>
                 </div>
               </div>
@@ -183,7 +183,7 @@ const FileDropZone = ({
             </div>
             {hasExisting && (
               <div className={`mt-1 flex items-center gap-1.5 text-xs px-3 py-1 rounded-full ${c.badge}`}>
-                📎 Actuel : {existingFile.split("/").pop()}
+               📎 Actuel : {existingFile.split("/").pop()}
               </div>
             )}
           </div>
@@ -192,7 +192,7 @@ const FileDropZone = ({
 
       {dragError && (
         <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-          ⚠️ {dragError}
+         ⚠️ {dragError}
         </p>
       )}
     </div>

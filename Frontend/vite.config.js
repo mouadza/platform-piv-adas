@@ -13,13 +13,7 @@ export default defineConfig({
       reporter: ['text-summary', 'lcov'],
       reportsDirectory: './coverage',
       include: [
-        'src/api/index.js',
-        'src/utils/authStorage.js',
-        'src/utils/globalGammeComments.js',
-        'src/utils/modifiedGammeExcelDownload.js',
-        'src/utils/projectKPI.js',
-        'src/utils/roles.js',
-        'src/components/validation/validationConstants.js',
+        'src/**/*.{js,jsx}',
       ],
       exclude: [
         'src/**/*.test.{js,jsx}',

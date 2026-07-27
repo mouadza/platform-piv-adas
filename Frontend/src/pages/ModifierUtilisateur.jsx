@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import UserForm from "../components/UserForm";
 import AffectationTable from "../components/AffectationTable";
 import DashboardLayout from "../components/DashboardLayout";
@@ -15,7 +16,6 @@ const ModifierUtilisateur = () => {
     email: "",
     password: "",
   });
-
   const [affectations, setAffectations] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,10 +35,10 @@ const ModifierUtilisateur = () => {
     });
 
     setAffectations(
-      userToEdit.affectations?.map((a) => ({
+      userToEdit.affectations?.map((item) => ({
         _key: crypto.randomUUID(),
-        projet: a.projet?.id ?? a.projet ?? "",
-        role: a.role ?? "",
+        projet: item.projet?.id ?? item.projet ?? "",
+        role: item.role ?? "",
       })) || []
     );
 
@@ -49,29 +49,30 @@ const ModifierUtilisateur = () => {
     const fetchProjects = async () => {
       try {
         const data = await projectsAPI.list();
-        setProjects(data);
+        setProjects(data || []);
         setError("");
       } catch {
         setError("Erreur chargement projets");
       }
     };
+
     fetchProjects();
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     if (!formData.username || !formData.email) {
       setError("Nom d'utilisateur et email obligatoires.");
       return;
     }
 
-    // Validate affectations
     const hasIncomplete = affectations.some(
-      (a) => a.projet === "" || a.role === ""
+      (item) => item.projet === "" || item.role === ""
     );
+
     if (hasIncomplete) {
-      setError("Veuillez sélectionner un projet et un rôle avant d'ajouter une nouvelle ligne.");
+      setError("Veuillez selectionner un projet et un role avant d'ajouter une nouvelle ligne.");
       return;
     }
 
@@ -82,24 +83,23 @@ const ModifierUtilisateur = () => {
       const payload = {
         username: formData.username,
         email: formData.email,
+        affectations: affectations
+          .map((item) => ({
+            role: item.role === "" ? null : item.role,
+            projet: item.projet === "" ? "" : item.projet,
+          }))
+          .filter((item) => item.role !== null),
       };
 
       if (formData.password.trim()) {
         payload.password = formData.password;
       }
 
-      payload.affectations = affectations
-        .map((a) => ({
-          role: a.role === "" ? null : a.role,
-          projet: a.projet === "" ? "" : a.projet,
-        }))
-        .filter((a) => a.role !== null);
-
       await usersAPI.update(userToEdit.id, payload);
       navigate("/listeUser");
     } catch (err) {
       console.error("Update error:", err);
-      setError(err.message || "Erreur mise à jour");
+      setError(err.message || "Erreur mise a jour");
     } finally {
       setSaving(false);
     }
@@ -108,8 +108,9 @@ const ModifierUtilisateur = () => {
   if (loading) {
     return (
       <DashboardLayout role="admin">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="space-y-4">
+          <div className="h-32 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+          <div className="h-72 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
         </div>
       </DashboardLayout>
     );
@@ -117,56 +118,63 @@ const ModifierUtilisateur = () => {
 
   return (
     <DashboardLayout role="admin">
-      <div className="mx-auto mt-20 max-w-[900px] bg-white rounded-3xl px-6 py-8 shadow-sm">
-        <div className="px-6 py-4">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold">
-              Modifier l'utilisateur {userToEdit.username}
-            </h2>
-            <p className="text-sm text-gray-500">
-              Mettre à jour informations et affectations.
-            </p>
+      <div className="mx-auto max-w-[980px] space-y-5">
+        <section className="app-panel">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+            Utilisateurs
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+            Modifier {userToEdit.username}
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Mettre a jour les informations et affectations.
+          </p>
+        </section>
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
+        <section className="app-panel">
           <UserForm
             formData={formData}
-            handleChange={(e) =>
-              setFormData((p) => ({ ...p, [e.target.name]: e.target.value }))
+            handleChange={(event) =>
+              setFormData((prev) => ({
+                ...prev,
+                [event.target.name]: event.target.value,
+              }))
             }
-            isEditMode={true}
+            isEditMode
           />
+        </section>
 
-          <div className="mt-6 border rounded-lg max-h-[320px] overflow-y-auto">
-            <AffectationTable
-              affectations={affectations}
-              setAffectations={setAffectations}
-              projects={projects}
-            />
-          </div>
+        <section className="app-panel max-h-[420px] overflow-y-auto">
+          <AffectationTable
+            affectations={affectations}
+            setAffectations={setAffectations}
+            projects={projects}
+          />
+        </section>
 
-          <div className="mt-8 flex justify-end gap-4">
-            <button
-              onClick={handleSubmit}
-              disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md disabled:opacity-50"
-            >
-              {saving ? "Sauvegarde..." : "Enregistrer"}
-            </button>
-
-            <button
-              onClick={() => navigate("/listeUser")}
-              className="bg-gray-200 hover:bg-gray-300 px-6 py-3 rounded-md"
-              disabled={saving}
-            >
-              Annuler
-            </button>
-          </div>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={() => navigate("/listeUser")}
+            disabled={saving}
+            className="btn-secondary px-6 py-3"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving}
+            className="btn-primary px-6 py-3 disabled:opacity-50"
+          >
+            {saving ? "Sauvegarde..." : "Enregistrer"}
+          </button>
         </div>
       </div>
     </DashboardLayout>

@@ -1,11 +1,20 @@
 import React from "react";
 import { COTATION, COTATION_OPTIONS } from "./validationConstants";
 
-const CotationSelect = ({ cell, rowIndex, disabled, onPendingChange }) => {
+const CotationSelect = ({
+  cell,
+  rowIndex,
+  disabled,
+  onPendingChange,
+  compact = false,
+}) => {
   const cfg = COTATION[cell.value] || COTATION.A_coter;
 
   return (
-    <div className="relative flex items-center" style={{ minWidth: "132px" }}>
+    <div
+      className="relative flex min-w-0 items-center"
+      style={{ minWidth: compact ? 0 : "140px" }}
+    >
       <span
         className="absolute left-2 w-2.5 h-2.5 rounded-sm pointer-events-none z-10 flex-shrink-0"
         style={{ backgroundColor: cfg.square }}
@@ -24,7 +33,9 @@ const CotationSelect = ({ cell, rowIndex, disabled, onPendingChange }) => {
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.6 : 1,
         }}
-        className="w-full appearance-none pl-6 pr-5 py-1.5 text-xs font-semibold rounded-md border outline-none transition-all focus:ring-2 focus:ring-offset-1 focus:ring-blue-300"
+        className={`w-full appearance-none rounded-lg border font-bold shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#243782]/25 focus:ring-offset-1 ${
+          compact ? "py-1.5 pl-6 pr-5 text-[10px]" : "py-2 pl-7 pr-7 text-xs"
+        }`}
       >
         {COTATION_OPTIONS.map((opt) => (
           <option key={opt} value={opt}>
@@ -48,3 +59,4 @@ const CotationSelect = ({ cell, rowIndex, disabled, onPendingChange }) => {
 };
 
 export default CotationSelect;
+

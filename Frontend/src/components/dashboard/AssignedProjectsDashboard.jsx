@@ -18,12 +18,12 @@ import {
 const themeClasses = {
   blue: {
     spinner: "border-blue-600",
-    accent: "text-blue-600",
-    badge: "bg-blue-50 text-blue-600 border-blue-100",
+    accent: "text-[#243782]",
+    badge: "bg-[#243782]/10 text-[#243782] border-[#243782]/15",
     card: "border-slate-100 hover:shadow-md",
-    cardTitle: "group-hover:text-blue-600",
-    metric: "text-blue-600",
-    footer: "text-blue-600",
+    cardTitle: "group-hover:text-[#243782]",
+    metric: "text-[#243782]",
+    footer: "text-[#243782]",
   },
   amber: {
     spinner: "border-amber-500",
@@ -41,14 +41,17 @@ const loaders = {
   valideur: dashboardsAPI.valideur,
 };
 
-const LoadingState = ({ role, theme }) => (
+const LoadingState = ({ role }) => (
   <DashboardLayout role={role}>
-    <div className="flex justify-center items-center h-96">
-      <div className="relative w-12 h-12">
-        <div className="absolute w-12 h-12 rounded-full border-4 border-slate-200" />
-        <div
-          className={`absolute w-12 h-12 rounded-full border-4 ${theme.spinner} border-t-transparent animate-spin`}
-        />
+    <div className="space-y-4">
+      <div className="h-32 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((item) => (
+          <div
+            key={item}
+            className="h-56 animate-pulse rounded-lg border border-slate-200 bg-slate-100"
+          />
+        ))}
       </div>
     </div>
   </DashboardLayout>
@@ -83,7 +86,7 @@ const ProjectCard = ({
   return (
     <div
       onClick={() => navigate(destination(projet))}
-      className={`group relative cursor-pointer bg-white rounded-2xl p-6 shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between ${theme.card}`}
+      className={`group relative flex cursor-pointer flex-col justify-between rounded-lg bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${theme.card}`}
     >
       <div>
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -98,7 +101,7 @@ const ProjectCard = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 bg-slate-50/70 rounded-xl p-3 text-center border border-slate-100/50">
+        <div className="grid grid-cols-3 gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-center">
           <ProjectMetric label="Arch" value={projet.architectures?.[0]} />
           <ProjectMetric
             label="Motor"
@@ -118,7 +121,7 @@ const ProjectCard = ({
         type="button"
         onClick={(event) => onDownloadProjectKPI(event, projet)}
         disabled={isDownloading}
-        className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#243782] px-3 py-2 text-xs font-bold text-white hover:bg-[#00133B] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Download size={14} />
         {isDownloading ? "Chargement..." : "KPI Projet"}
@@ -266,9 +269,10 @@ const AssignedProjectsDashboard = ({
 
   return (
     <DashboardLayout role={layoutRole}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-5 border-b border-slate-100">
+      <section className="app-panel mb-5">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
             {title}{" "}
             <span className={`${theme.accent} font-black`}>
               {username || "Utilisateur"}
@@ -280,11 +284,12 @@ const AssignedProjectsDashboard = ({
           )}
         </div>
       </div>
+      </section>
 
-      <div className="mx-auto mt-10 max-w-[1400px] bg-white px-2 py-8 rounded-3xl shadow">
-        <div className="px-6 space-y-6">
+      <section className="app-panel">
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-950">
               {projectsTitle}
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${theme.badge}`}
@@ -295,11 +300,11 @@ const AssignedProjectsDashboard = ({
           </div>
 
           {projets.length === 0 ? (
-            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center">
+            <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
               <p className="text-slate-500 font-medium">{emptyMessage}</p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {projets.map((projet) => (
                 <ProjectCard
                   key={projet.id}
@@ -314,7 +319,7 @@ const AssignedProjectsDashboard = ({
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       <ProjectKpiModal
         modal={projectKpiModal}
@@ -352,3 +357,5 @@ const AssignedProjectsDashboard = ({
 };
 
 export default AssignedProjectsDashboard;
+
+

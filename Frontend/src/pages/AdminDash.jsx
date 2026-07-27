@@ -27,12 +27,14 @@ import {
   AlertTriangle,
   CheckCircle2,
   Gauge,
+  CalendarDays,
 } from "lucide-react";
 
 const AdminDash = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [dateRange, setDateRange] = useState({ debut: "", fin: "" });
 
   const fetchDashboard = async () => {
     try {
@@ -58,8 +60,20 @@ const AdminDash = () => {
   if (loading) {
     return (
       <DashboardLayout role="admin">
-        <div className="flex items-center justify-center min-h-[70vh]">
-          <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full" />
+        <div className="space-y-4">
+          <div className="h-32 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-28 animate-pulse rounded-lg border border-slate-200 bg-slate-100"
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div className="h-80 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+            <div className="h-80 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -89,6 +103,58 @@ const AdminDash = () => {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                KPI Dashboard
+              </p>
+              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+                Pilotage validation gammes
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Distribution des cotations, avancement EV et exports Excel.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+              <label className="flex flex-col gap-1 text-xs font-bold text-slate-500">
+                Debut
+                <input
+                  type="date"
+                  value={dateRange.debut}
+                  onChange={(event) =>
+                    setDateRange((prev) => ({
+                      ...prev,
+                      debut: event.target.value,
+                    }))
+                  }
+                  className="h-10 rounded-lg border border-slate-200 px-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold text-slate-500">
+                Fin
+                <input
+                  type="date"
+                  value={dateRange.fin}
+                  onChange={(event) =>
+                    setDateRange((prev) => ({
+                      ...prev,
+                      fin: event.target.value,
+                    }))
+                  }
+                  className="h-10 rounded-lg border border-slate-200 px-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
+                />
+              </label>
+              <div className="flex items-end">
+                <span className="inline-flex h-10 items-center gap-2 rounded-full bg-emerald-100 px-4 text-xs font-extrabold text-emerald-800 ring-1 ring-emerald-200">
+                  <CalendarDays size={15} />
+                  Global actif
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
@@ -183,9 +249,9 @@ const AdminDash = () => {
 
 const colorMap = {
   blue: {
-    card: "border-blue-100 bg-blue-50",
-    icon: "bg-blue-100 text-blue-700",
-    text: "text-blue-700",
+    card: "border-[#243782]/15 bg-[#243782]/10",
+    icon: "bg-[#243782]/15 text-[#243782]",
+    text: "text-[#243782]",
   },
   purple: {
     card: "border-purple-100 bg-purple-50",
@@ -198,9 +264,9 @@ const colorMap = {
     text: "text-slate-700",
   },
   sky: {
-    card: "border-sky-100 bg-sky-50",
-    icon: "bg-sky-100 text-sky-700",
-    text: "text-sky-700",
+    card: "border-[#243782]/15 bg-[#243782]/10",
+    icon: "bg-[#243782]/15 text-[#243782]",
+    text: "text-[#243782]",
   },
   green: {
     card: "border-emerald-100 bg-emerald-50",
@@ -213,9 +279,9 @@ const colorMap = {
     text: "text-amber-700",
   },
   indigo: {
-    card: "border-indigo-100 bg-indigo-50",
-    icon: "bg-indigo-100 text-indigo-700",
-    text: "text-indigo-700",
+    card: "border-[#243782]/15 bg-[#243782]/10",
+    icon: "bg-[#243782]/15 text-[#243782]",
+    text: "text-[#243782]",
   },
   red: {
     card: "border-red-100 bg-red-50",
@@ -228,14 +294,16 @@ const COTATION_COLORS = {
   OK: "#16a34a",
   NOK: "#dc2626",
   NOK_mineur: "#f97316",
-  A_traiter: "#2563eb",
+  A_traiter: "#111827",
+  Non_cote: "#6b7280",
 };
 
 const cotationLabels = {
   OK: "OK",
   NOK: "NOK",
   NOK_mineur: "NOK Mineur",
-  A_traiter: "A traiter",
+  A_traiter: "A coter",
+  Non_cote: "Non cote",
 };
 
 const formatProjectLabel = (name, size = 18) => {
@@ -254,8 +322,8 @@ const GlobalCotationsChart = ({ data }) => {
     .filter((item) => item.value > 0);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-slate-800 mb-1">
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-1 text-lg font-extrabold text-slate-950">
         Distribution globale des cotations
       </h2>
       <p className="text-sm text-slate-500 mb-4">
@@ -297,8 +365,8 @@ const GlobalCotationsChart = ({ data }) => {
 };
 
 const ValidationEvolutionChart = ({ data }) => (
-  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-    <h2 className="text-xl font-bold text-slate-800 mb-1">
+  <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 className="mb-1 text-lg font-extrabold text-slate-950">
       Evolution mensuelle des validations
     </h2>
     <p className="text-sm text-slate-500 mb-4">
@@ -346,8 +414,8 @@ const ProjectProgressChart = ({ data }) => {
     .sort((a, b) => b.advancement_percent - a.advancement_percent);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-slate-800 mb-1">
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-1 text-lg font-extrabold text-slate-950">
         Avancement validation par projet
       </h2>
       <p className="text-sm text-slate-500 mb-4">
@@ -413,8 +481,8 @@ const CotationsByProjectChart = ({ data }) => {
   }));
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-slate-800 mb-1">
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-1 text-lg font-extrabold text-slate-950">
         Répartition des cotations par projet
       </h2>
 
@@ -461,7 +529,7 @@ const CotationsByProjectChart = ({ data }) => {
                       OK: "OK",
                       NOK: "NOK",
                       NOK_mineur: "NOK Mineur",
-                      A_traiter: "À traiter",
+                      A_traiter: "A coter",
                     };
 
                     return [value, labels[name] || name];
@@ -477,28 +545,28 @@ const CotationsByProjectChart = ({ data }) => {
                 <Bar
                   dataKey="OK"
                   name="OK"
-                  fill="#2E7D32"
+                  fill="#16a34a"
                   radius={[6, 6, 0, 0]}
                 />
 
                 <Bar
                   dataKey="NOK"
                   name="NOK"
-                  fill="#C62828"
+                  fill="#dc2626"
                   radius={[6, 6, 0, 0]}
                 />
 
                 <Bar
                   dataKey="NOK_mineur"
                   name="NOK Mineur"
-                  fill="#F9A825"
+                  fill="#f97316"
                   radius={[6, 6, 0, 0]}
                 />
 
                 <Bar
                   dataKey="A_traiter"
-                  name="À traiter"
-                  fill="#0284C7"
+                  name="A coter"
+                  fill="#111827"
                   radius={[6, 6, 0, 0]}
                 />
               </BarChart>
@@ -514,7 +582,7 @@ const StatCard = ({ title, value, subValue, icon, color = "slate" }) => {
   const c = colorMap[color] || colorMap.slate;
 
   return (
-    <div className={`border rounded-2xl p-5 ${c.card}`}>
+    <div className={`rounded-lg border p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${c.card}`}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-600">
@@ -533,7 +601,7 @@ const StatCard = ({ title, value, subValue, icon, color = "slate" }) => {
         </div>
 
         <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center ${c.icon}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-lg ${c.icon}`}
         >
           {icon}
         </div>
@@ -543,8 +611,8 @@ const StatCard = ({ title, value, subValue, icon, color = "slate" }) => {
 };
 
 const RiskProjects = ({ items }) => (
-  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-    <h2 className="text-xl font-bold text-slate-800 mb-1">
+  <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 className="mb-1 text-lg font-extrabold text-slate-950">
       Projets a surveiller
     </h2>
 
@@ -562,7 +630,7 @@ const RiskProjects = ({ items }) => (
         {items.map((item) => (
           <div
             key={item.project_id}
-            className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+            className="rounded-lg border border-slate-100 bg-slate-50 p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -581,7 +649,7 @@ const RiskProjects = ({ items }) => (
 
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
               <div
-                className="h-full rounded-full bg-blue-600"
+                className="h-full rounded-full bg-[#243782]"
                 style={{
                   width: `${Math.min(
                     100,
@@ -601,7 +669,7 @@ const RiskProjects = ({ items }) => (
               <span className="rounded-md bg-orange-50 px-2 py-1 text-orange-700">
                 Mineur {item.NOK_mineur}
               </span>
-              <span className="rounded-md bg-blue-50 px-2 py-1 text-blue-700">
+              <span className="rounded-md bg-slate-950 px-2 py-1 text-white">
                 A traiter {item.A_traiter}
               </span>
             </div>
@@ -613,8 +681,8 @@ const RiskProjects = ({ items }) => (
 );
 
 const RecentGammes = ({ items }) => (
-  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-    <h2 className="text-xl font-bold text-slate-800 mb-4">
+  <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 className="mb-4 text-lg font-extrabold text-slate-950">
       Dernières gammes importées
     </h2>
 
@@ -627,7 +695,7 @@ const RecentGammes = ({ items }) => (
         {items.map((item) => (
           <div
             key={item.id}
-            className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+            className="rounded-lg border border-slate-100 bg-slate-50 p-4"
           >
             <div className="flex justify-between gap-3">
               <div>
@@ -660,8 +728,8 @@ const RecentGammes = ({ items }) => (
 );
 
 const RecentValidations = ({ items }) => (
-  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-    <h2 className="text-xl font-bold text-slate-800 mb-4">
+  <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 className="mb-4 text-lg font-extrabold text-slate-950">
       Dernières validations
     </h2>
 
@@ -674,7 +742,7 @@ const RecentValidations = ({ items }) => (
         {items.map((item) => (
           <div
             key={item.id}
-            className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+            className="rounded-lg border border-slate-100 bg-slate-50 p-4"
           >
             <div className="flex justify-between gap-3">
               <div>
@@ -707,9 +775,10 @@ const RecentValidations = ({ items }) => (
 
 
 const EmptyChart = ({ message }) => (
-  <div className="h-[260px] flex items-center justify-center text-sm text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+  <div className="flex h-[260px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
     {message}
   </div>
 );
 
 export default AdminDash;
+

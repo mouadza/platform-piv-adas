@@ -51,7 +51,7 @@ const SortableTableRow = ({ gamme, index, changeStatus, setGammeToDelete, reques
       case "CANCEL":
         return "bg-red-100 text-red-700 border-red-200 hover:bg-red-200";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-slate-100 text-slate-600 border-slate-200";
     }
   };
 
@@ -60,7 +60,7 @@ const SortableTableRow = ({ gamme, index, changeStatus, setGammeToDelete, reques
       ref={setNodeRef}
       style={style}
       className={`border-t transition-colors ${
-        isDragging ? "bg-blue-50 shadow-lg z-10 relative opacity-80" : "hover:bg-slate-50 bg-white"
+        isDragging ? "bg-[#243782]/10 shadow-lg z-10 relative opacity-80" : "hover:bg-slate-50 bg-white"
       }`}
     >
       <td className="px-4 py-3 text-center">
@@ -68,7 +68,7 @@ const SortableTableRow = ({ gamme, index, changeStatus, setGammeToDelete, reques
           <button
             {...attributes}
             {...listeners}
-            className="text-slate-300 hover:text-blue-500 cursor-grab active:cursor-grabbing p-1 transition-colors"
+            className="text-slate-300 hover:text-[#243782] cursor-grab active:cursor-grabbing p-1 transition-colors"
             title="Glisser pour réorganiser"
           >
             <FaGripVertical size={16} />
@@ -110,7 +110,7 @@ const SortableTableRow = ({ gamme, index, changeStatus, setGammeToDelete, reques
             href={gamme.fichier_gamme}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 hover:underline transition-colors"
+            className="text-xs font-medium text-[#243782] bg-[#243782]/10 px-2 py-1 rounded hover:bg-[#243782]/15 hover:underline transition-colors"
           >
             {gamme.original_filename || gamme.nom || `Fichier ${gamme.id}`}
           </a>
@@ -123,7 +123,7 @@ const SortableTableRow = ({ gamme, index, changeStatus, setGammeToDelete, reques
         <div className="flex justify-center gap-3">
           <button
             onClick={() => requestNavigation(`/gamme/${projetId}/${gamme.id}`)}
-            className="p-1.5 text-blue-500 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            className="p-1.5 text-[#243782] bg-[#243782]/10 rounded-lg hover:bg-[#243782]/15 transition-colors"
             title="Voir"
           >
             <FaEye size={15} />
@@ -289,7 +289,7 @@ const ViewProjet = () => {
       <DashboardLayout role={userRole}>
         <div className="flex h-64 items-center justify-center text-slate-400 italic">
           <div className="animate-pulse flex flex-col items-center gap-3">
-             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+             <div className="h-16 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
              Chargement du projet...
           </div>
         </div>
@@ -310,31 +310,31 @@ const ViewProjet = () => {
         <div className="px-4">
           <button
             onClick={() => requestNavigation(-1)}
-            className="text-blue-600 text-sm font-semibold hover:underline flex items-center gap-2"
+            className="text-[#243782] text-sm font-semibold hover:underline flex items-center gap-2"
           >
             ← Retour
           </button>
           </div>
       <div className="mx-auto px-4 sm:px-8 md:px-16 lg:px-24 py-6">
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 md:p-10">
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-8 md:p-10">
           
           <div className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
               {projet.nom_projet}
             </h1>
-            <span className="bg-blue-600/10 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold shrink-0">
+            <span className="bg-[#243782]/10 text-[#243782] px-4 py-1.5 rounded-full text-sm font-bold shrink-0">
               ID: {projet.id}
             </span>
           </div>
 
           <h2 className="text-xl font-bold text-slate-800 text-center mb-8 relative">
-            <span className="bg-white px-4 relative z-10">À propos du projet</span>
+            <span className="bg-white px-4 relative z-10">A propos du projet</span>
             <div className="absolute top-1/2 left-0 w-full h-px bg-slate-100 -z-0"></div>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-6 text-center">Membres affectés</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -352,7 +352,7 @@ const ViewProjet = () => {
               </div>
             </div>
 
-            <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-6 text-center">Détails techniques</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -381,10 +381,10 @@ const ViewProjet = () => {
                 <button
                 onClick={() => saveChanges()}
                 disabled={saving}
-                className="bg-emerald-500 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all flex items-center gap-2"
+                className="bg-emerald-600 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center gap-2"
                 >
                 {saving ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="h-2 w-2 rounded-full bg-white/90 animate-pulse" />
                 ) : (
                     <FaSave size={16} />
                 )}
@@ -393,7 +393,7 @@ const ViewProjet = () => {
             )}
               <button
                 onClick={() => requestNavigation(`/CreerGamme/${id}`)}
-                className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 shadow-sm transition-all"
+                className="bg-[#243782] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#00133B] shadow-sm transition-all"
               >
                 + Créer une gamme
               </button>
@@ -401,16 +401,16 @@ const ViewProjet = () => {
             </div>
 
             {gammes.length === 0 ? (
-              <div className="border border-dashed border-slate-300 rounded-2xl py-16 flex flex-col items-center justify-center bg-slate-50">
+              <div className="border border-dashed border-slate-300 rounded-lg py-16 flex flex-col items-center justify-center bg-slate-50">
                 <span className="text-4xl mb-3">📁</span>
                 <span className="text-slate-500 font-medium">Aucune gamme créée pour ce projet</span>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
                 {/* CORRECTION DE STRUCTURE : DndContext enveloppe la table */}
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <table className="min-w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                    <thead className="bg-[#00133B] text-white font-semibold border-b border-slate-200">
                       <tr>
                         <th className="px-4 py-4 text-center">Ordre d'exécution</th>
                         <th className="px-4 py-4 text-center">Code</th>
@@ -450,8 +450,8 @@ const ViewProjet = () => {
 
       {/* MODAL : Changements non sauvegardés */}
       {pendingNavigation !== null && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+        <div className="modal-backdrop">
+          <div className="modal-sheet p-6 sm:max-w-md animate-in fade-in zoom-in duration-200">
             <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center mb-5 mx-auto">
               <FaExclamationTriangle size={24} />
             </div>
@@ -464,24 +464,24 @@ const ViewProjet = () => {
               <button
                 onClick={() => saveChanges(pendingNavigation)}
                 disabled={saving}
-                className="w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex justify-center items-center gap-2"
+                className="w-full px-4 py-3 rounded-lg text-sm font-bold text-white bg-[#243782] hover:bg-[#00133B] transition-colors flex justify-center items-center gap-2"
               >
                 {saving ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="h-2 w-2 rounded-full bg-white/90 animate-pulse" />
                 ) : null}
                 Sauvegarder et continuer
               </button>
               <button
                 onClick={discardAndNavigate}
                 disabled={saving}
-                className="w-full px-4 py-3 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                className="w-full px-4 py-3 rounded-lg text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
               >
                 Ignorer les modifications
               </button>
               <button
                 onClick={() => setPendingNavigation(null)}
                 disabled={saving}
-                className="w-full px-4 py-2.5 mt-2 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                className="w-full px-4 py-2.5 mt-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors"
               >
                 Annuler
               </button>
@@ -492,8 +492,8 @@ const ViewProjet = () => {
 
       {/* MODAL : Supprimer une gamme */}
       {gammeToDelete && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6">
+        <div className="modal-backdrop">
+          <div className="modal-sheet p-6 sm:max-w-md">
             <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4 mx-auto">
               <FaTrash size={20} />
             </div>
@@ -506,7 +506,7 @@ const ViewProjet = () => {
               <button
                 onClick={() => setGammeToDelete(null)}
                 disabled={deleting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200"
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200"
               >
                 Annuler
               </button>
@@ -525,7 +525,7 @@ const ViewProjet = () => {
                   }
                 }}
                 disabled={deleting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700"
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-700"
               >
                 {deleting ? "Suppression..." : "Supprimer"}
 
@@ -539,3 +539,7 @@ const ViewProjet = () => {
 };
 
 export default ViewProjet;
+
+
+
+

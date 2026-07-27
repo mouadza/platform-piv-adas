@@ -258,9 +258,6 @@ export const configAPI = {
 };
 
 export const authAPI = {
-  adminPasswordLogin: ({ email, password }) =>
-    publicPostData("/api/token/", { email, password }),
-
   requestOtp: (email) =>
     publicPostData("/api/otp/request/", { email }),
 
@@ -280,6 +277,15 @@ export const dashboardsAPI = {
 
 export const auditAPI = {
   list: (params = {}) => getData("/admin_config/audit-logs/", { params }),
+};
+
+export const notificationsAPI = {
+  list: (params = {}) => getData("/admin_config/notifications/", { params }),
+  unreadCount: () => getData("/admin_config/notifications/unread-count/"),
+  markRead: (notificationId) =>
+    patchData(`/admin_config/notifications/${notificationId}/read/`, {}),
+  markAllRead: () =>
+    patchData("/admin_config/notifications/read-all/", {}),
 };
 
 /* =========================

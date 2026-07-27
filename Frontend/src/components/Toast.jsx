@@ -32,10 +32,10 @@ const Toast = ({ message, type = "info", onClose, duration = 4000, id }) => {
       Icon: AlertCircle,
     },
     info: {
-      bg: "bg-blue-50",
-      border: "border-blue-200",
+      bg: "bg-[#243782]/10",
+      border: "border-[#243782]/25",
       text: "text-blue-800",
-      icon: "text-blue-500",
+      icon: "text-[#243782]",
       Icon: Info,
     },
   };
@@ -65,3 +65,4 @@ const Toast = ({ message, type = "info", onClose, duration = 4000, id }) => {
 };
 
 export default Toast;
+

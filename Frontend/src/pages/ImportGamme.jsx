@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Upload, ChevronLeft, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
-import { API_BASE_URL } from '../api';
-import { getAccessToken } from '../utils/authStorage';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  CheckCircle,
+  ChevronLeft,
+  Eye,
+  FileText,
+  Upload,
+  XCircle,
+} from "lucide-react";
+
+import DashboardLayout from "../components/DashboardLayout";
+import { API_BASE_URL } from "../api";
+import { getAccessToken } from "../utils/authStorage";
 
 const ImportGammePage = () => {
   const { id } = useParams();
@@ -18,26 +27,24 @@ const ImportGammePage = () => {
     const fetchProjet = async () => {
       const token = getAccessToken();
       if (!token) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
       try {
         const response = await fetch(`${API_BASE_URL}/admin_config/detail/${id}/`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
           const data = await response.json();
           setProjet({ id: data.id, nom: data.nomProjet });
         } else {
-          setError("Erreur lors de la récupération du projet");
+          setError("Erreur lors de la recuperation du projet");
         }
       } catch {
-        setError("Erreur réseau lors de la récupération du projet");
+        setError("Erreur reseau lors de la recuperation du projet");
       }
     };
 
@@ -48,14 +55,14 @@ const ImportGammePage = () => {
     const file = event.target.files[0];
     setError(null);
 
-    if (file && !file.name.endsWith('.xlsm')) {
-      setError('Seuls les fichiers Excel (.xlsm) sont acceptés');
+    if (file && !file.name.endsWith(".xlsm")) {
+      setError("Seuls les fichiers Excel (.xlsm) sont acceptes");
       setSelectedFile(null);
       return;
     }
 
     if (file && file.size > 10 * 1024 * 1024) {
-      setError('La taille du fichier ne doit pas dépasser 10MB');
+      setError("La taille du fichier ne doit pas depasser 10MB");
       setSelectedFile(null);
       return;
     }
@@ -72,27 +79,26 @@ const ImportGammePage = () => {
     setUploadSuccess(false);
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    const token = getAccessToken();
+    formData.append("file", selectedFile);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin_config/projets/${id}/gammes/`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/admin_config/projets/${id}/gammes/`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getAccessToken()}` },
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         setUploadSuccess(true);
       } else {
         const errorData = await response.json();
-        setError(errorData.error || "Échec de l'importation");
+        setError(errorData.error || "Echec de l'importation");
       }
     } catch {
-      setError("Erreur réseau lors de l'importation du fichier");
+      setError("Erreur reseau lors de l'importation du fichier");
     } finally {
       setIsUploading(false);
     }
@@ -105,128 +111,137 @@ const ImportGammePage = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <header className="px-8 py-6 flex justify-between items-center border-b">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            Retour
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Importer une gamme</h1>
-          <div className="w-5 h-5"></div>
-        </header>
-
-        <main className="p-8">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-blue-100">
-            <div className="flex items-center">
-              <FileText className="w-6 h-6 text-blue-500 mr-3" />
-              <div>
-                {error && <p className="text-red-500 mb-2">{error}</p>}
-                {projet ? (
-                  <>
-                    <h2 className="text-lg font-semibold text-gray-800">{projet.nom}</h2>
-                    <p className="text-sm text-gray-500">ID: {projet.id}</p>
-                  </>
-                ) : (
-                  <p className="text-gray-500">Chargement des informations du projet...</p>
-                )}
-                
-              </div>
+    <DashboardLayout role={localStorage.getItem("role") || "ppl"}>
+      <div className="mx-auto max-w-4xl space-y-5">
+        <section className="app-panel">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+              <ChevronLeft size={18} />
+              Retour
+            </button>
+            <div className="sm:text-right">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Import
+              </p>
+              <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
+                Importer une gamme
+              </h1>
             </div>
           </div>
+        </section>
 
-          {/* Bouton "Afficher les gammes importées" déplacé ici */}
-          <div className="mb-6 flex justify-end">
-            <button
-              onClick={() => navigate(`/GammeImporte/${id}`)}             
-              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 flex items-center"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Afficher les gammes importées
-            </button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-8 text-center">
-              {uploadSuccess ? (
-                <div className="flex flex-col items-center">
-                  <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">Fichier importé avec succès !</h3>
-                  <p className="text-gray-500 mb-6">{selectedFile ? selectedFile.name : ''}</p>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={handleReset}
-                      className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
-                    >
-                      Importer un autre fichier
-                    </button>
-                  </div>
-                </div>
-              ) : (
+        <section className="app-panel">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-[#243782]" />
+            <div>
+              {projet ? (
                 <>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6">
-                    <Upload className="w-10 h-10 text-blue-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {selectedFile ? "Fichier sélectionné" : "Glissez-déposez votre fichier Excel"}
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      {selectedFile ? selectedFile.name : "ou cliquez pour parcourir vos fichiers"}
-                    </p>
-                    <p className="text-xs text-gray-400">Format supporté: .xlsm (max 10MB)</p>
-                    <input
-                      type="file"
-                      id="file-upload"
-                      className="hidden"
-                      onChange={handleFileChange}
-                      accept=".xlsm"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-                    >
-                      {selectedFile ? "Changer de fichier" : "Sélectionner un fichier"}
-                    </label>
-                  </div>
-
-                  {error && (
-                    <div className="flex items-center justify-center text-red-500 mb-4">
-                      <XCircle className="w-5 h-5 mr-2" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-
-                  {selectedFile && (
-                    <button
-                      onClick={handleUpload}
-                      disabled={isUploading}
-                      className={`px-6 py-3 rounded-md text-white font-medium w-full max-w-xs ${
-                        isUploading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
-                    >
-                      {isUploading ? 'Import en cours...' : 'Importer la gamme'}
-                    </button>
-                  )}
+                  <h2 className="text-lg font-extrabold text-slate-950">
+                    {projet.nom}
+                  </h2>
+                  <p className="text-sm text-slate-500">ID: {projet.id}</p>
                 </>
+              ) : (
+                <div className="h-10 w-64 animate-pulse rounded-lg bg-slate-100" />
               )}
             </div>
           </div>
+        </section>
 
-          <div className="mt-6 bg-blue-50 rounded-lg p-4">
-            <h3 className="font-medium text-blue-800 mb-2">Instructions :</h3>
-            <ul className="list-disc list-inside text-sm text-blue-700 space-y-1">
-              <li>Seuls les fichiers Excel (.xlsm) sont acceptés</li>
-              <li>Le fichier doit respecter le modèle fourni</li>
-              <li>Taille maximale : 10MB</li>
-              <li>Les données existantes seront mises à jour</li>
-            </ul>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => navigate(`/GammeImporte/${id}`)}
+            className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 hover:bg-emerald-100"
+          >
+            <Eye size={16} />
+            Afficher les gammes importees
+          </button>
+        </div>
+
+        <section className="app-card overflow-hidden">
+          <div className="p-8 text-center">
+            {uploadSuccess ? (
+              <div className="flex flex-col items-center">
+                <CheckCircle className="mb-4 h-12 w-12 text-emerald-600" />
+                <h3 className="mb-2 text-xl font-extrabold text-slate-950">
+                  Fichier importe avec succes
+                </h3>
+                <p className="mb-6 text-slate-500">
+                  {selectedFile ? selectedFile.name : ""}
+                </p>
+                <button type="button" onClick={handleReset} className="btn-secondary">
+                  Importer un autre fichier
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="mb-6 rounded-lg border-2 border-dashed border-slate-300 p-8">
+                  <Upload className="mx-auto mb-4 h-10 w-10 text-[#243782]" />
+                  <h3 className="mb-2 text-lg font-extrabold text-slate-950">
+                    {selectedFile
+                      ? "Fichier selectionne"
+                      : "Glissez-deposez votre fichier Excel"}
+                  </h3>
+                  <p className="mb-4 text-slate-500">
+                    {selectedFile
+                      ? selectedFile.name
+                      : "ou cliquez pour parcourir vos fichiers"}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Format supporte: .xlsm (max 10MB)
+                  </p>
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept=".xlsm"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="mt-4 inline-block cursor-pointer rounded-lg bg-[#243782] px-4 py-2 text-sm font-bold text-white hover:bg-[#00133B]"
+                  >
+                    {selectedFile ? "Changer de fichier" : "Selectionner un fichier"}
+                  </label>
+                </div>
+
+                {error && (
+                  <div className="mb-4 flex items-center justify-center text-red-600">
+                    <XCircle className="mr-2 h-5 w-5" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {selectedFile && (
+                  <button
+                    type="button"
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    className="w-full max-w-xs rounded-lg bg-[#243782] px-6 py-3 font-bold text-white hover:bg-[#00133B] disabled:opacity-60"
+                  >
+                    {isUploading ? "Import en cours..." : "Importer la gamme"}
+                  </button>
+                )}
+              </>
+            )}
           </div>
-        </main>
+        </section>
+
+        <section className="rounded-lg border border-[#243782]/15 bg-[#243782]/10 p-4">
+          <h3 className="mb-2 font-bold text-blue-800">Instructions</h3>
+          <ul className="list-inside list-disc space-y-1 text-sm text-[#243782]">
+            <li>Seuls les fichiers Excel (.xlsm) sont acceptes</li>
+            <li>Le fichier doit respecter le modele fourni</li>
+            <li>Taille maximale : 10MB</li>
+            <li>Les donnees existantes seront mises a jour</li>
+          </ul>
+        </section>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
 export default ImportGammePage;
+
+

@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
+import { Car, Check, Eye, List, Plus, Search, Trash2, X } from "lucide-react";
 import { MultiSelect } from "primereact/multiselect";
 import { vehiculesAPI } from "../api/index";
 
 const ROLES = ["PPL", "VALIDEUR", "VISITEUR"];
 
 const SELECT_CLASS =
-  "w-full border border-slate-200 rounded-xl p-3 text-sm bg-white outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50 transition-all appearance-none cursor-pointer";
+  "w-full border border-slate-200 rounded-lg p-3 text-sm bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15 transition-all appearance-none cursor-pointer";
 
 const ProjetForm = ({
   title,
@@ -82,8 +83,8 @@ const ProjetForm = ({
         ? "bg-amber-500 text-white border-amber-600"
         : "bg-white text-slate-400 border-amber-300 hover:border-amber-500 hover:text-amber-600",
       VISITEUR: isActive
-        ? "bg-indigo-600 text-white border-indigo-700"
-        : "bg-white text-slate-400 border-indigo-300 hover:border-indigo-500 hover:text-indigo-600",
+        ? "bg-[#243782] text-white border-blue-700"
+        : "bg-white text-slate-400 border-blue-300 hover:border-blue-500 hover:text-[#243782]",
     };
     return base + styles[role];
   };
@@ -93,7 +94,7 @@ const ProjetForm = ({
       return { label: "PPL", titleColor: "text-emerald-600", softBg: "bg-emerald-50/50", border: "border-emerald-100" };
     if (role === "VALIDEUR")
       return { label: "Valideurs", titleColor: "text-amber-500", softBg: "bg-amber-50/50", border: "border-amber-100" };
-    return { label: "Visiteurs", titleColor: "text-indigo-600", softBg: "bg-indigo-50/50", border: "border-indigo-100" };
+    return { label: "Visiteurs", titleColor: "text-[#243782]", softBg: "bg-[#243782]/10/50", border: "border-[#243782]/15" };
   };
 
   const isDuplicateVehicule = (field, value, excludeIndex = null) => {
@@ -134,19 +135,25 @@ const ProjetForm = ({
       // API duplicate check (only for new entries)
       if (editIndex === null) {
         const cmqCheck = await vehiculesAPI.check({ cmq });
-        if (cmqCheck.data.exists) { setVehiculeError(`Le CMQ "${cmq}" existe déjà.`); return; }
+        if (cmqCheck.data.exists) {
+          setVehiculeError(`Le CMQ "${cmq}" existe deja.`);
+          return;
+        }
 
         const vinCheck = await vehiculesAPI.check({ vin });
-        if (vinCheck.data.exists) { setVehiculeError(`Le VIN "${vin}" existe déjà.`); return; }
+        if (vinCheck.data.exists) {
+          setVehiculeError(`Le VIN "${vin}" existe deja.`);
+          return;
+        }
       }
 
       // Local duplicate check (exclude current row when editing)
       if (isDuplicateVehicule("cmq", cmq, editIndex)) {
-        setVehiculeError(`Le CMQ "${cmq}" est déjà utilisé ici.`);
+        setVehiculeError(`Le CMQ "${cmq}" est deja utilise ici.`);
         return;
       }
       if (isDuplicateVehicule("vin", vin, editIndex)) {
-        setVehiculeError(`Le VIN "${vin}" est déjà utilisé ici.`);
+        setVehiculeError(`Le VIN "${vin}" est deja utilise ici.`);
         return;
       }
 
@@ -175,20 +182,20 @@ const ProjetForm = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
 
       {/* HEADER */}
-      <header className="px-10 pt-10 pb-6 flex-shrink-0">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{title}</h1>
-        {subtitle && <p className="text-indigo-600 text-sm font-semibold mt-1">{subtitle}</p>}
+      <header className="px-5 pt-5 pb-4 flex-shrink-0 sm:px-8 sm:pt-8">
+        <h1 className="text-2xl font-extrabold text-slate-950 tracking-tight sm:text-3xl">{title}</h1>
+        {subtitle && <p className="text-[#243782] text-sm font-semibold mt-1">{subtitle}</p>}
       </header>
 
       {/* BODY */}
-      <div className="flex-1 overflow-y-auto px-10 space-y-10 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-5 space-y-8 custom-scrollbar sm:px-8">
 
         {/* TOP INPUTS */}
-        <section className="bg-slate-50/50 rounded-3xl p-8 border border-slate-100">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <section className="bg-slate-50/50 rounded-lg p-4 border border-slate-100 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
 
             {/* Nom */}
             <div>
@@ -196,7 +203,7 @@ const ProjetForm = ({
                 Nom du projet
               </label>
               <input
-                className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-indigo-50 focus:border-indigo-300 outline-none transition-all"
+                className="w-full border border-slate-200 rounded-lg p-3 text-sm bg-white focus:ring-2 focus:ring-[#243782]/15 focus:border-blue-500 outline-none transition-all"
                 value={project.nom}
                 onChange={(e) => setProject({ ...project, nom: e.target.value })}
               />
@@ -218,7 +225,7 @@ const ProjetForm = ({
                     <option key={a.id} value={a.id}>{a.nom}</option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">▾</span>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">v</span>
               </div>
             </div>
 
@@ -245,32 +252,34 @@ const ProjetForm = ({
               <input
                 type="number"
                 readOnly
-                className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-slate-100 text-slate-500 outline-none cursor-not-allowed"
+                className="w-full border border-slate-200 rounded-lg p-3 text-sm bg-slate-100 text-slate-500 outline-none cursor-not-allowed"
                 value={vehicules.length}
               />
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <button
               type="button"
               onClick={openCreateModal}
-              className="rounded-xl bg-blue-700 text-white px-6 py-3 text-sm font-black hover:bg-blue-800 active:scale-95 transition-all"
+              className="btn-primary px-5 py-3"
             >
+              <Plus size={16} />
               Créer véhicules
             </button>
             <button
               type="button"
               onClick={() => setShowVehiculeList(true)}
-              className="rounded-xl bg-slate-200 text-slate-700 px-6 py-3 text-sm font-black hover:bg-slate-300 active:scale-95 transition-all"
+              className="btn-secondary px-5 py-3"
             >
+              <List size={16} />
               Liste véhicules
             </button>
           </div>
         </section>
 
         {/* ASSIGNMENT */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-10">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 pb-8">
 
           {/* User list */}
           <div className="xl:col-span-4 flex flex-col">
@@ -279,21 +288,21 @@ const ProjetForm = ({
               <div className="relative w-1/2">
                 <input
                   placeholder="Rechercher..."
-                  className="w-full text-xs border-slate-200 rounded-full pl-8 pr-4 py-2 bg-slate-50 focus:bg-white outline-none border transition-all"
+                  className="w-full text-xs border-slate-200 rounded-lg pl-8 pr-4 py-2 bg-slate-50 focus:bg-white outline-none border transition-all"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-                <span className="absolute left-3 top-2.5 opacity-30 text-[10px]">🔍</span>
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
-            <div className="flex-1 bg-white border border-slate-100 rounded-[2rem] p-4 space-y-2 shadow-inner-sm overflow-y-auto max-h-[400px] custom-scrollbar">
+            <div className="flex-1 bg-white border border-slate-100 rounded-lg p-4 space-y-2 shadow-inner-sm overflow-y-auto max-h-[400px] custom-scrollbar">
               {filteredUsers.length === 0 ? (
                 <div className="py-10 text-center text-sm italic text-slate-400">Aucun utilisateur trouvé</div>
               ) : (
                 filteredUsers.map((user) => {
                   const assignedRole = getAssignedRole(user.id);
                   return (
-                    <div key={user.id} className="group flex justify-between items-center p-3 rounded-2xl hover:bg-slate-50 border border-transparent transition-all">
+                    <div key={user.id} className="group flex justify-between items-center p-3 rounded-lg hover:bg-slate-50 border border-transparent transition-all">
                       <span className="text-sm font-bold text-slate-600 truncate mr-4">{user.username}</span>
                       <div className="flex gap-2 shrink-0">
                         {ROLES.map((role) => (
@@ -323,7 +332,7 @@ const ProjetForm = ({
                   <span className={`text-[11px] font-black uppercase mb-4 text-center tracking-[0.2em] ${meta.titleColor}`}>
                     {meta.label} ({affectations[role].length})
                   </span>
-                  <div className={`flex-1 ${meta.softBg} border-2 border-dashed ${meta.border} rounded-[2rem] p-4 space-y-3 min-h-[300px] overflow-y-auto max-h-[400px] custom-scrollbar`}>
+                  <div className={`flex-1 ${meta.softBg} border-2 border-dashed ${meta.border} rounded-lg p-4 space-y-3 min-h-[300px] overflow-y-auto max-h-[400px] custom-scrollbar`}>
                     {affectations[role].length === 0 ? (
                       <div className="h-full min-h-[250px] flex items-center justify-center text-xs text-slate-400 italic text-center">
                         Aucun membre ajouté
@@ -332,14 +341,14 @@ const ProjetForm = ({
                       affectations[role].map((id) => {
                         const user = users.find((u) => u.id === id);
                         return (
-                          <div key={`${role}-${id}`} className="flex justify-between items-center bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-50">
+                          <div key={`${role}-${id}`} className="flex justify-between items-center bg-white px-4 py-3 rounded-lg shadow-sm border border-slate-50">
                             <span className="text-xs font-bold text-slate-600 truncate">{user?.username}</span>
                             <button
                               type="button"
                               onClick={() => removeUser(id, role)}
-                              className="text-md font-bold text-black hover:text-red-500 transition-colors px-1"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                             >
-                              ✕
+                              <X size={14} />
                             </button>
                           </div>
                         );
@@ -354,25 +363,27 @@ const ProjetForm = ({
       </div>
 
       {/* FOOTER */}
-      <footer className="px-10 py-8 border-t border-slate-50 flex justify-end items-center gap-8 bg-white flex-shrink-0">
+      <footer className="px-5 py-5 border-t border-slate-100 flex flex-col justify-end gap-3 bg-white flex-shrink-0 sm:flex-row sm:items-center sm:px-8">
         {onCancel && (
-          <button type="button" onClick={onCancel} className="text-slate-400 py-4 px-6 hover:text-slate-600 text-sm font-bold transition-all">
+          <button type="button" onClick={onCancel} className="btn-secondary w-full sm:w-auto">
+            <X size={16} />
             Annuler
           </button>
         )}
         <button
           type="button"
           onClick={onSubmit}
-          className="bg-blue-800 text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-slate-200 hover:bg-indigo-600 hover:-translate-y-0.5 transition-all active:scale-95"
+          className="btn-primary w-full px-8 py-3 shadow-[#243782]/20 hover:-translate-y-0.5 sm:w-auto"
         >
+          <Check size={16} />
           {submitLabel}
         </button>
       </footer>
 
-      {/* ── MODAL CREATE / EDIT VEHICULE ───────────────────────────────────── */}
+      {/* â”€â”€ MODAL CREATE / EDIT VEHICULE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {showVehiculeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8">
+        <div className="modal-backdrop">
+          <div className="modal-sheet w-full p-5 sm:max-w-lg sm:p-6">
 
             {/* Dynamic title */}
             <div className="flex items-center justify-between mb-6">
@@ -382,17 +393,18 @@ const ProjetForm = ({
               <button
                 type="button"
                 onClick={() => { setShowVehiculeModal(false); setVehiculeError(""); setEditIndex(null); }}
-                className="text-slate-400 hover:text-slate-600 text-xl font-black"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
-                ×
+                <X size={18} />
               </button>
             </div>
 
             {vehiculeError && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl mb-5">
-                <span>⚠️</span>
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold px-4 py-3 rounded-lg mb-5">
                 <span className="flex-1">{vehiculeError}</span>
-                <button type="button" onClick={() => setVehiculeError("")} className="text-red-400 hover:text-red-600 font-black">✕</button>
+                <button type="button" onClick={() => setVehiculeError("")} className="text-red-400 hover:text-red-600 font-black">
+                  <X size={14} />
+                </button>
               </div>
             )}
 
@@ -401,7 +413,7 @@ const ProjetForm = ({
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5">CMQ</label>
                 <input
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all"
+                  className="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all"
                   placeholder="Ex: CMQ-001"
                   value={vehiculeForm.cmq}
                   onChange={(e) => { setVehiculeError(""); setVehiculeForm({ ...vehiculeForm, cmq: e.target.value }); }}
@@ -412,7 +424,7 @@ const ProjetForm = ({
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5">VIN</label>
                 <input
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all"
+                  className="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all"
                   placeholder="Ex: VF1234567890"
                   value={vehiculeForm.vin}
                   onChange={(e) => { setVehiculeError(""); setVehiculeForm({ ...vehiculeForm, vin: e.target.value }); }}
@@ -433,11 +445,11 @@ const ProjetForm = ({
                       <option key={m.id} value={m.id}>{m.nom}</option>
                     ))}
                   </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">▾</span>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">v</span>
                 </div>
                 {filteredMotorisations.length === 0 && (
                   <p className="text-xs text-amber-500 mt-1.5">
-                    ⚠️ Sélectionnez d'abord une motorisation pour le projet.
+                    Selectionnez d'abord une motorisation pour le projet.
                   </p>
                 )}
               </div>
@@ -447,15 +459,16 @@ const ProjetForm = ({
               <button
                 type="button"
                 onClick={() => { setShowVehiculeModal(false); setVehiculeError(""); setEditIndex(null); }}
-                className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+                className="btn-secondary"
               >
                 Annuler
               </button>
               <button
                 type="button"
                 onClick={saveVehicule}
-                className="px-6 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-colors"
+                className="btn-primary"
               >
+                <Car size={16} />
                 {editIndex !== null ? "Enregistrer" : "Ajouter"}
               </button>
             </div>
@@ -463,28 +476,30 @@ const ProjetForm = ({
         </div>
       )}
 
-      {/* ── MODAL LIST VEHICULES ───────────────────────────────────────────── */}
+      {/* â”€â”€ MODAL LIST VEHICULES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {showVehiculeList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-8">
+        <div className="modal-backdrop">
+          <div className="modal-sheet w-full p-5 sm:max-w-3xl sm:p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-slate-900">
                 Liste des véhicules <span className="text-slate-400 font-normal text-lg">({vehicules.length})</span>
               </h2>
-              <button type="button" onClick={() => setShowVehiculeList(false)} className="text-slate-400 hover:text-red-500 font-black text-xl">×</button>
+              <button type="button" onClick={() => setShowVehiculeList(false)} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600">
+                <X size={18} />
+              </button>
             </div>
 
             {vehicules.length === 0 ? (
               <div className="text-center text-slate-400 italic py-10">Aucun véhicule ajouté</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border border-slate-200 rounded-xl overflow-hidden">
-                  <thead className="bg-slate-50">
+                <table className="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                  <thead className="bg-[#00133B] text-white">
                     <tr>
-                      <th className="p-3 text-left font-bold text-slate-600">CMQ</th>
-                      <th className="p-3 text-left font-bold text-slate-600">VIN</th>
-                      <th className="p-3 text-left font-bold text-slate-600">Motorisation</th>
-                      <th className="p-3 text-center font-bold text-slate-600">Actions</th>
+                      <th className="p-3 text-left font-bold">CMQ</th>
+                      <th className="p-3 text-left font-bold">VIN</th>
+                      <th className="p-3 text-left font-bold">Motorisation</th>
+                      <th className="p-3 text-center font-bold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -496,19 +511,21 @@ const ProjetForm = ({
                           <td className="p-3 font-mono text-slate-700">{v.vin}</td>
                           <td className="p-3 text-slate-600">{mot?.nom || "-"}</td>
                           <td className="p-3">
-                            <div className="flex gap-3 justify-center">
+                            <div className="flex gap-2 justify-center">
                               <button
                                 type="button"
                                 onClick={() => openEditModal(index)}
-                                className="text-blue-600 hover:text-blue-800 font-bold text-xs transition-colors"
+                                className="btn-secondary px-3 py-1.5 text-xs"
                               >
+                                <Eye size={13} />
                                 Modifier
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeVehicule(index)}
-                                className="text-red-500 hover:text-red-700 font-bold text-xs transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-100"
                               >
+                                <Trash2 size={13} />
                                 Supprimer
                               </button>
                             </div>
@@ -536,3 +553,6 @@ const ProjetForm = ({
 };
 
 export default ProjetForm;
+
+
+

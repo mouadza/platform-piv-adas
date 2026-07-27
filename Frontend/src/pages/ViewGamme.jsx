@@ -17,7 +17,7 @@ import {
 
 const BASE_URL = `${API_BASE_URL}/admin_config`;
 
-/* ── Helpers ── */
+/* â”€â”€ Helpers â”€â”€ */
 const getFileExtension = (path) =>
   path?.split(".").pop().toUpperCase() || "FILE";
 
@@ -47,19 +47,19 @@ const getStatusBadge = (status) => {
     case "CANCEL":
       return <span className="bg-red-100 text-red-700 border border-red-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>Annulée</span>;
     default:
-      return <span className="bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">{status || "Inconnu"}</span>;
+      return <span className="bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">{status || "Inconnu"}</span>;
   }
 };
 
-/* ── Composants ── */
+/* â”€â”€ Composants â”€â”€ */
 const FileCard = ({ path, label, onView }) => {
   if (!path) {
     return (
-      <div className="flex items-center gap-4 p-5 border border-dashed border-slate-300 bg-slate-50 rounded-2xl text-sm italic text-slate-400">
-        <div className="w-10 h-10 rounded-xl bg-slate-200/50 flex items-center justify-center">
+      <div className="flex items-center gap-4 p-5 border border-dashed border-slate-300 bg-slate-50 rounded-lg text-sm italic text-slate-400">
+        <div className="w-10 h-10 rounded-lg bg-slate-200/50 flex items-center justify-center">
           <FaFileArchive className="text-slate-400" size={18} />
         </div>
-        Aucun fichier — {label}
+        Aucun fichier {label}
       </div>
     );
   }
@@ -72,9 +72,9 @@ const FileCard = ({ path, label, onView }) => {
   const Icon  = style.icon;
 
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border ${style.border} ${style.light} transition-all hover:shadow-md`}>
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border ${style.border} ${style.light} transition-all hover:shadow-md`}>
       <div className="flex items-center gap-4 min-w-0">
-        <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${style.bg} flex items-center justify-center shadow-inner`}>
+        <div className={`flex-shrink-0 w-12 h-12 rounded-lg ${style.bg} flex items-center justify-center shadow-inner`}>
           <Icon className="text-white" size={20} />
         </div>
         <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ const FileCard = ({ path, label, onView }) => {
         {!isZip && onView && (
           <button
             onClick={onView}
-            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm"
+            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm"
           >
             <FaEye size={14} /> Voir
           </button>
@@ -95,7 +95,7 @@ const FileCard = ({ path, label, onView }) => {
         <a
           href={url}
           download
-          className={`flex items-center gap-2 ${style.bg} hover:brightness-110 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm`}
+          className={`flex items-center gap-2 ${style.bg} hover:brightness-110 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm`}
         >
           <FaDownload size={12} /> Télécharger
         </a>
@@ -110,11 +110,11 @@ const InfoRow = ({ icon: Icon, label, value }) => (
       {Icon && <Icon className="text-slate-400" size={16} />}
       <span className="text-sm text-slate-500 font-medium">{label}</span>
     </div>
-    <span className="text-sm font-bold text-slate-800 text-right">{value || "—"}</span>
+    <span className="text-sm font-bold text-slate-800 text-right">{value || "-"}</span>
   </div>
 );
 
-/* ── Main Component ── */
+/* â”€â”€ Main Component â”€â”€ */
 const ViewGamme = () => {
   const { id, projetId } = useParams();
   const navigate = useNavigate();
@@ -154,7 +154,7 @@ const ViewGamme = () => {
       <DashboardLayout role="admin">
         <div className="flex h-64 items-center justify-center text-slate-400 italic">
           <div className="animate-pulse flex flex-col items-center gap-3">
-             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+             <div className="h-16 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
              Chargement de la gamme...
           </div>
         </div>
@@ -169,14 +169,14 @@ const ViewGamme = () => {
 
       <button
           onClick={() => navigate(-1)}
-          className="text-blue-600 text-sm font-semibold hover:underline flex items-center gap-2"
+          className="text-[#243782] text-sm font-semibold hover:underline flex items-center gap-2"
         >
           <FaArrowLeft size={12} /> Retour
         </button>
 
       <div className="mx-auto px-4 sm:px-8 md:px-16 lg:px-24 py-6">
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8 md:p-10">
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-6 sm:p-8 md:p-10">
           
           {/* Header */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-10">
@@ -189,12 +189,12 @@ const ViewGamme = () => {
               </div>
               {projet && (
                 <p className="text-slate-500 font-medium flex items-center gap-2">
-                  Projet : <span className="text-blue-600 font-bold">{projet.nom_projet}</span>
+                  Projet : <span className="text-[#243782] font-bold">{projet.nom_projet}</span>
                 </p>
               )}
             </div>
             {projet && (
-              <span className="bg-blue-50 text-blue-700 border border-blue-100 px-5 py-2 rounded-xl text-sm font-bold flex-shrink-0 shadow-sm">
+              <span className="bg-[#243782]/10 text-[#243782] border border-[#243782]/15 px-5 py-2 rounded-lg text-sm font-bold flex-shrink-0 shadow-sm">
                 ID Projet: {projet.id}
               </span>
             )}
@@ -207,7 +207,7 @@ const ViewGamme = () => {
 
           {/* Info cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
               <h3 className="font-bold text-lg mb-4 text-slate-800 text-center">
                 Informations générales
               </h3>
@@ -219,7 +219,7 @@ const ViewGamme = () => {
               </div>
             </div>
 
-            <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
               <h3 className="font-bold text-lg mb-4 text-slate-800 text-center">
                 Besoin Technique
               </h3>
@@ -256,3 +256,6 @@ const ViewGamme = () => {
 };
 
 export default ViewGamme;
+
+
+

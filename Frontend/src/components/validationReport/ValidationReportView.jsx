@@ -8,11 +8,11 @@ import {
 } from "lucide-react";
 
 const COTATION_LABELS = {
-  A_coter: "À coter",
+  A_coter: "A coter",
   OK: "OK",
   NOK: "NOK",
   NOK_mineur: "NOK Mineur",
-  Non_coté: "Non coté",
+  "Non_coté": "Non coté",
 };
 
 const ValidationReportView = ({
@@ -30,7 +30,7 @@ const ValidationReportView = ({
 }) => {
   return (
     <>
-      <div className="mb-6 bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="mb-6 rounded-lg border border-slate-200 bg-white shadow-sm px-6 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <span className="font-bold text-slate-700">
           {gammeName || `Gamme ${gammeId}`}
         </span>
@@ -47,7 +47,7 @@ const ValidationReportView = ({
           <button
             type="button"
             onClick={onRefresh}
-            className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900"
+            className="inline-flex items-center justify-center rounded-lg bg-[#243782] px-4 py-2 text-xs font-bold text-white hover:bg-[#00133B]"
           >
             Actualiser
           </button>
@@ -64,7 +64,7 @@ const ValidationReportView = ({
       />
 
       {filteredReport.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-slate-300 py-16 text-center">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-white py-16 text-center">
           <p className="text-slate-400 text-sm">
             Aucun résultat ne correspond aux filtres sélectionnés.
           </p>
@@ -116,7 +116,7 @@ const ValidationKpiGrid = ({ globalStats }) => (
     />
 
     <KpiCard
-      title="Steps à coter"
+      title="Steps A coter"
       value={globalStats.notChangedSteps}
       icon={<AlertTriangle size={18} />}
       color="red"
@@ -130,7 +130,7 @@ const ValidationReportFilters = ({
   filterCotation,
   setFilterCotation,
 }) => (
-  <div className="mb-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col lg:flex-row gap-3">
+  <div className="mb-6 rounded-lg border border-slate-200 bg-white shadow-sm p-4 flex flex-col lg:flex-row gap-3">
     <div className="relative flex-1">
       <Search
         size={16}
@@ -142,17 +142,17 @@ const ValidationReportFilters = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Rechercher un step..."
-        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-blue-300"
+        className="field-control pl-9"
       />
     </div>
 
     <select
       value={filterCotation}
       onChange={(e) => setFilterCotation(e.target.value)}
-      className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-blue-300"
+      className="field-control flex-1"
     >
       <option value="ALL">Toutes les cotations</option>
-      <option value="A_coter">À coter</option>
+      <option value="A_coter">A coter</option>
       <option value="OK">OK</option>
       <option value="NOK_mineur">NOK Mineur</option>
       <option value="NOK">NOK</option>
@@ -166,13 +166,13 @@ const KpiCard = ({ title, value, icon, color }) => {
     slate: "bg-slate-50 border-slate-200 text-slate-700",
     emerald: "bg-emerald-50 border-emerald-200 text-emerald-700",
     amber: "bg-amber-50 border-amber-200 text-amber-700",
-    blue: "bg-blue-50 border-blue-200 text-blue-700",
+    blue: "bg-[#243782]/10 border-[#243782]/25 text-[#243782]",
     red: "bg-red-50 border-red-200 text-red-700",
   };
 
   return (
     <div
-      className={`rounded-2xl border p-4 shadow-sm ${
+      className={`rounded-lg border p-4 shadow-sm ${
         colors[color] || colors.slate
       }`}
     >
@@ -189,8 +189,8 @@ const KpiCard = ({ title, value, icon, color }) => {
 
 const EVReportCard = ({ ev, getCotationBadgeClass, getEtatBadgeClass }) => {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 bg-slate-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="px-5 py-4 bg-slate-50 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
           <h2 className="text-lg font-black text-slate-800">{ev.evCode}</h2>
 
@@ -222,14 +222,14 @@ const EVReportCard = ({ ev, getCotationBadgeClass, getEtatBadgeClass }) => {
         <CountBadge label="OK" value={ev.counts.OK} color="emerald" />
         <CountBadge label="NOK" value={ev.counts.NOK} color="red" />
         <CountBadge label="NOK mineur" value={ev.counts.NOK_mineur} color="amber" />
-        <CountBadge label="Non coté" value={ev.counts.Non_coté} color="slate" />
-        <CountBadge label="À coter" value={ev.counts.A_coter} color="yellow" />
+        <CountBadge label="Non coté" value={ev.counts.Non_cote} color="slate" />
+        <CountBadge label="A coter" value={ev.counts.A_coter} color="yellow" />
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-slate-700 text-white">
+            <tr className="bg-[#00133B] text-white">
               <th className="px-4 py-2 text-left">Step</th>
               <th className="px-4 py-2 text-left">Cotation</th>
               <th className="px-4 py-2 text-left">État</th>
@@ -272,7 +272,7 @@ const EVReportCard = ({ ev, getCotationBadgeClass, getEtatBadgeClass }) => {
                   {step.commentaire ? (
                     <span className="line-clamp-2">{step.commentaire}</span>
                   ) : (
-                    <span className="text-slate-300">—</span>
+                    <span className="text-slate-300">-</span>
                   )}
                 </td>
 
@@ -288,8 +288,8 @@ const EVReportCard = ({ ev, getCotationBadgeClass, getEtatBadgeClass }) => {
       </div>
 
       {ev.notChangedSteps.length > 0 && (
-        <div className="px-5 py-3 bg-yellow-50 border-t border-yellow-100">
-          <p className="text-xs font-bold text-yellow-700 mb-2">
+        <div className="px-5 py-3 bg-slate-950 border-t border-slate-950">
+          <p className="text-xs font-bold text-white mb-2">
             Steps non encore cotés :
           </p>
 
@@ -297,7 +297,7 @@ const EVReportCard = ({ ev, getCotationBadgeClass, getEtatBadgeClass }) => {
             {ev.notChangedSteps.map((step) => (
               <span
                 key={step.stepCode}
-                className="px-2 py-1 rounded-md bg-white border border-yellow-200 text-yellow-700 text-xs font-mono"
+                className="px-2 py-1 rounded-md bg-white border border-slate-300 text-slate-950 text-xs font-mono"
               >
                 {step.stepCode}
               </span>
@@ -315,7 +315,7 @@ const CountBadge = ({ label, value, color }) => {
     red: "bg-red-50 text-red-700",
     amber: "bg-amber-50 text-amber-700",
     slate: "bg-slate-100 text-slate-600",
-    yellow: "bg-yellow-50 text-yellow-700",
+    yellow: "bg-slate-950 text-white",
   };
 
   return (
@@ -330,3 +330,6 @@ const CountBadge = ({ label, value, color }) => {
 };
 
 export default ValidationReportView;
+
+
+

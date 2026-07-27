@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 import {
@@ -31,6 +31,8 @@ import {
 
 const EspaceUser = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const autoOpenedProjectRef = useRef("");
 
   const userRole = "visiteur";
 
@@ -113,7 +115,7 @@ const EspaceUser = () => {
 
       setProjets(Array.from(uniqueProjectsMap.values()));
     } catch (err) {
-      console.error("Erreur décodage token :", err);
+      console.error("Erreur de décodage du jeton :", err);
       setError("Impossible de charger vos projets affectés.");
     } finally {
       setLoading(false);
@@ -156,6 +158,34 @@ const EspaceUser = () => {
       await loadGammesForProject(projetId);
     }
   };
+
+  useEffect(() => {
+    if (loading || projets.length === 0) return;
+
+    const params = new URLSearchParams(location.search);
+    const targetProjectId =
+      params.get("project") || localStorage.getItem("selected_project_id");
+
+    if (!targetProjectId || autoOpenedProjectRef.current === targetProjectId) {
+      return;
+    }
+
+    const targetProject = projets.find(
+      (projet) => String(projet.id) === String(targetProjectId)
+    );
+
+    if (!targetProject) return;
+
+    autoOpenedProjectRef.current = String(targetProjectId);
+    setOpenedProjects((prev) => ({
+      ...prev,
+      [targetProject.id]: true,
+    }));
+
+    if (!gammesByProjet[targetProject.id]) {
+      loadGammesForProject(targetProject.id);
+    }
+  }, [loading, projets, location.search]);
 
 
   const handleDownloadProjectKPI = async (projet) => {
@@ -371,11 +401,11 @@ const EspaceUser = () => {
 
   return (
     <DashboardLayout role={userRole}>
-      <div className="p-8">
+      <div className="space-y-5">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
               Mon espace
             </h1>
 
@@ -385,7 +415,7 @@ const EspaceUser = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-[#243782]/15 text-[#243782] text-xs font-bold">
               {projets.length} projet(s) affecté(s)
             </span>
 
@@ -398,7 +428,7 @@ const EspaceUser = () => {
         {/* LOADING */}
         {loading && (
           <div className="flex justify-center items-center gap-3 py-16">
-            <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full" />
+            <div className="h-16 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
 
             <span className="text-slate-500 font-medium">
               Chargement de vos projets...
@@ -415,8 +445,8 @@ const EspaceUser = () => {
 
         {/* EMPTY */}
         {!loading && projets.length === 0 && (
-          <div className="border border-dashed border-slate-300 rounded-2xl py-16 flex flex-col items-center justify-center bg-slate-50">
-            <span className="text-4xl mb-3">📁</span>
+          <div className="border border-dashed border-slate-300 rounded-lg py-16 flex flex-col items-center justify-center bg-slate-50">
+            <span className="text-4xl mb-3">ðŸ“</span>
 
             <span className="text-slate-600 font-bold">
               Aucun projet affecté
@@ -439,7 +469,7 @@ const EspaceUser = () => {
               return (
                 <div
                   key={projet.id}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+                  className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden"
                 >
                   {/* PROJECT HEADER */}
                   <button
@@ -448,7 +478,7 @@ const EspaceUser = () => {
                     className="w-full flex items-center justify-between px-6 py-5 hover:bg-slate-50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                      <div className="w-11 h-11 rounded-xl bg-[#243782]/15 text-[#243782] flex items-center justify-center">
                         <BsFolderFill size={20} />
                       </div>
 
@@ -462,7 +492,7 @@ const EspaceUser = () => {
                             ID Projet : {projet.id}
                           </p>
 
-                          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-full bg-[#243782]/10 text-[#243782] text-[10px] font-bold">
                             {getRolesLabel(projet.roles)}
                           </span>
                         </div>
@@ -492,7 +522,7 @@ const EspaceUser = () => {
                           type="button"
                           onClick={() => handleDownloadProjectKPI(projet)}
                           disabled={downloadingProjectKPI[projet.id]}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-[#243782]/15 px-3 py-2 text-xs font-bold text-[#243782] hover:bg-[#243782]/20 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Download size={14} />
                           {downloadingProjectKPI[projet.id]
@@ -503,7 +533,7 @@ const EspaceUser = () => {
 
                       {isLoadingGammes && (
                         <div className="flex items-center justify-center gap-3 py-8">
-                          <div className="animate-spin h-7 w-7 border-b-2 border-blue-600 rounded-full" />
+                          <div className="h-12 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
 
                           <span className="text-sm text-slate-500">
                             Chargement des gammes...
@@ -535,7 +565,7 @@ const EspaceUser = () => {
                                     onClick={() =>
                                       navigate(`/visualiser/${gamme.id}`)
                                     }
-                                    className="font-bold text-blue-700 hover:underline cursor-pointer truncate"
+                                    className="font-bold text-[#243782] hover:underline cursor-pointer truncate"
                                   >
                                     {getGammeName(gamme)}
                                   </h3>
@@ -612,7 +642,7 @@ const EspaceUser = () => {
                                   type="button"
                                   onClick={() => handleDownloadKPI(gamme)}
                                   disabled={downloadingKPI[gamme.id]}
-                                  className="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-xs font-bold flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed"
+                                  className="px-3 py-2 rounded-lg bg-[#243782]/15 text-[#243782] hover:bg-[#243782]/20 text-xs font-bold flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                   <Download size={14} />
                                   {downloadingKPI[gamme.id]
@@ -659,8 +689,8 @@ const EspaceUser = () => {
 
         {/* SYNTHESE MODAL */}
         {syntheseModal.isOpen && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+          <div className="modal-backdrop">
+            <div className="modal-sheet sm:max-w-md">
               <div
                 className={`px-6 py-5 border-b border-slate-100 ${
                   syntheseModal.type === "success"
@@ -717,3 +747,6 @@ const EspaceUser = () => {
 };
 
 export default EspaceUser;
+
+
+

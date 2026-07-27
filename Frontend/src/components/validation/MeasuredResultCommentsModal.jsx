@@ -25,11 +25,11 @@ const MeasuredResultCommentsModal = ({
   const comments = modal.comments || [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-[560px] max-h-[85vh] overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+    <div className="modal-backdrop">
+      <div className="modal-sheet sm:max-w-[560px]">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-extrabold text-slate-900">
               Commentaires résultat mesuré
             </h3>
 
@@ -41,13 +41,13 @@ const MeasuredResultCommentsModal = ({
           <button
             type="button"
             onClick={() => setModal(emptyMeasuredModal)}
-            className="text-slate-500 hover:text-slate-900 font-bold"
+            className="rounded-lg px-2 py-1 font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           >
             ✕
           </button>
         </div>
 
-        <div className="p-5 overflow-y-auto max-h-[60vh]">
+        <div className="max-h-[62vh] overflow-y-auto p-5">
           {modal.loading && (
             <p className="text-sm text-slate-500">Chargement...</p>
           )}
@@ -62,7 +62,7 @@ const MeasuredResultCommentsModal = ({
             comments.map((item) => (
               <div
                 key={item.id}
-                className="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                className="mb-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-bold text-slate-800">
@@ -84,7 +84,7 @@ const MeasuredResultCommentsModal = ({
                           editingText: e.target.value,
                         }))
                       }
-                      className="w-full min-h-[80px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
+                      className="w-full min-h-[80px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
                     />
 
                     <div className="flex justify-end gap-2">
@@ -97,7 +97,7 @@ const MeasuredResultCommentsModal = ({
                             editingText: "",
                           }))
                         }
-                        className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 rounded-md"
+                        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold"
                       >
                         Annuler
                       </button>
@@ -105,7 +105,7 @@ const MeasuredResultCommentsModal = ({
                       <button
                         type="button"
                         onClick={() => onUpdate(item.id)}
-                        className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-md"
+                        className="rounded-lg bg-[#243782] px-3 py-1.5 text-xs font-bold text-white"
                       >
                         Enregistrer
                       </button>
@@ -128,7 +128,7 @@ const MeasuredResultCommentsModal = ({
                               editingText: item.commentaire,
                             }))
                           }
-                          className="px-3 py-1.5 text-xs font-bold bg-blue-50 border border-blue-200 text-blue-700 rounded-md hover:bg-blue-100"
+                          className="rounded-lg border border-[#243782]/25 bg-[#243782]/10 px-3 py-1.5 text-xs font-bold text-[#243782] hover:bg-[#243782]/15"
                         >
                           Modifier
                         </button>
@@ -136,7 +136,7 @@ const MeasuredResultCommentsModal = ({
                         <button
                           type="button"
                           onClick={() => onDelete(item.id)}
-                          className="px-3 py-1.5 text-xs font-bold bg-red-50 border border-red-200 text-red-700 rounded-md hover:bg-red-100"
+                          className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-100"
                         >
                           Supprimer
                         </button>
@@ -149,7 +149,7 @@ const MeasuredResultCommentsModal = ({
         </div>
 
         {!readOnly && (
-          <div className="px-5 py-4 border-t border-slate-100 bg-slate-50">
+          <div className="border-t border-slate-100 bg-slate-50 px-5 py-4">
             <textarea
               value={modal.newComment}
               onChange={(e) =>
@@ -159,7 +159,7 @@ const MeasuredResultCommentsModal = ({
                 }))
               }
               placeholder="Ajouter un commentaire lié au résultat mesuré..."
-              className="w-full min-h-[90px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
+              className="w-full min-h-[96px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
             />
 
             <div className="flex justify-end mt-3">
@@ -167,7 +167,7 @@ const MeasuredResultCommentsModal = ({
                 type="button"
                 onClick={onCreate}
                 disabled={modal.saving}
-                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-60"
+                className="rounded-lg bg-[#243782] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#00133B] disabled:opacity-60"
               >
                 {modal.saving ? "Enregistrement..." : "Ajouter commentaire"}
               </button>
@@ -180,3 +180,5 @@ const MeasuredResultCommentsModal = ({
 };
 
 export default MeasuredResultCommentsModal;
+
+

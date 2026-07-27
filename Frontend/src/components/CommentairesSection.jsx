@@ -19,6 +19,7 @@ const CommentairesSection = ({
   type = null,
   title,
   readOnly = false,
+  compact = false,
 }) => {
   const [commentaires, setCommentaires] = useState([]);
   const [text, setText] = useState("");
@@ -203,9 +204,17 @@ const CommentairesSection = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100 bg-slate-50">
-        <MessageSquare size={16} className="text-sky-500" />
+    <div
+      className={`flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${
+        compact ? "h-full" : ""
+      }`}
+    >
+      <div
+        className={`flex flex-shrink-0 items-center gap-2 border-b border-slate-100 bg-white ${
+          compact ? "px-4 py-2.5" : "px-5 py-4"
+        }`}
+      >
+        <MessageSquare size={16} className="text-[#243782]" />
 
         <h3 className="font-bold text-slate-700 text-sm">
           {getTitle()}
@@ -223,14 +232,18 @@ const CommentairesSection = ({
           )}
 
           {commentaires.length > 0 && (
-            <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-sky-100 text-sky-600 rounded-full">
+            <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#243782]/15 text-[10px] font-bold text-[#243782]">
               {commentaires.length}
             </span>
           )}
         </h3>
       </div>
 
-      <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+      <div
+        className={`min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto ${
+          compact ? "" : "max-h-72"
+        }`}
+      >
         {commentaires.length === 0 ? (
           <p className="text-center text-slate-400 text-sm py-8">
             Aucun commentaire
@@ -239,10 +252,10 @@ const CommentairesSection = ({
           commentaires.map((c) => (
             <div
               key={c.id}
-              className="flex gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors"
+              className="flex gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center mt-0.5">
-                <User size={14} className="text-sky-500" />
+              <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#243782]/15">
+                <User size={14} className="text-[#243782]" />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -259,7 +272,7 @@ const CommentairesSection = ({
                         value={editingText}
                         onChange={(e) => setEditingText(e.target.value)}
                         rows={3}
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                        className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#243782]/20"
                       />
                     ) : (
                       <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">
@@ -286,7 +299,7 @@ const CommentairesSection = ({
                           <button
                             type="button"
                             onClick={() => saveEdit(c.id)}
-                            className=" h-7 w-7 flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 transition hover:bg-emerald-200"
                             title="Enregistrer"
                           >
                             <Check size={14} />
@@ -295,7 +308,7 @@ const CommentairesSection = ({
                           <button
                             type="button"
                             onClick={cancelEdit}
-                            className=" h-7 w-7 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200"
                             title="Annuler"
                           >
                             <X size={14} />
@@ -306,7 +319,7 @@ const CommentairesSection = ({
                           <button
                             type="button"
                             onClick={() => startEdit(c)}
-                            className="h-7 w-7 flex items-center justify-center rounded-lg bg-sky-100 text-sky-700 hover:bg-sky-200"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#243782]/15 text-[#243782] transition hover:bg-[#243782]/20"
                             title="Modifier"
                           >
                             <Pencil size={13} />
@@ -315,7 +328,7 @@ const CommentairesSection = ({
                           <button
                             type="button"
                             onClick={() => deleteComment(c.id)}
-                            className=" h-7 w-7 flex items-center justify-center rounded-lg bg-red-100 text-red-700 hover:bg-red-200"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-100 text-red-700 transition hover:bg-red-200"
                             title="Supprimer"
                           >
                             <Trash2 size={13} />
@@ -332,22 +345,26 @@ const CommentairesSection = ({
       </div>
 
       {!readOnly && (
-      <div className="px-5 py-4 bg-slate-50 border-t border-slate-100">
-        <div className="flex gap-2 items-end">
+      <div
+        className={`flex-shrink-0 border-t border-slate-100 bg-slate-50 ${
+          compact ? "h-[64px] px-4 py-2" : "h-[72px] px-5 py-3"
+        }`}
+      >
+        <div className="flex h-full items-center gap-2">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            rows={2}
+            rows={1}
             placeholder="Ajouter un commentaire… (Ctrl+Entrée pour envoyer)"
-            className="flex-1 resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-transparent transition-all"
+            className="h-full flex-1 resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-[#243782]/20"
           />
 
           <button
             type="button"
             onClick={add}
             disabled={loading || !text.trim()}
-            className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-xl bg-sky-500 text-white hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all shadow-sm shadow-sky-200"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#243782] text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#00133B] hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
             title="Envoyer"
           >
             <Send size={16} />

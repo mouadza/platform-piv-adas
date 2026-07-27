@@ -1,14 +1,178 @@
 import React, { useEffect, useState } from "react";
 import {
-  BsCheckCircleFill,
-  BsChevronDown,
-  BsChevronRight,
-  BsFileEarmarkSpreadsheetFill,
-  BsFolderFill,
-} from "react-icons/bs";
-import { CalendarDays, Download, RotateCcw, Save, X } from "lucide-react";
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  Eye,
+  FileDown,
+  FileSpreadsheet,
+  FolderOpen,
+  Map,
+  MessageSquareText,
+  RotateCcw,
+  Save,
+  SearchX,
+  Sparkles,
+  X,
+} from "lucide-react";
 
 import CommentairesSection from "../CommentairesSection";
+
+const actionButtonBase =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold shadow-sm ring-1 ring-inset transition-all duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:px-4";
+
+const actionButtonStyles = {
+  primary:
+    "bg-[#243782] text-white ring-[#243782]/20 hover:bg-[#00133B] hover:ring-[#243782]/30",
+  secondary:
+    "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50 hover:text-slate-950 hover:ring-slate-300",
+  success:
+    "bg-emerald-600 text-white ring-emerald-500/20 hover:bg-emerald-700 hover:ring-emerald-400",
+  info: "bg-[#243782]/10 text-[#243782] ring-[#243782]/15 hover:bg-[#243782]/15 hover:ring-[#243782]/25",
+  warning:
+    "bg-amber-50 text-amber-800 ring-amber-100 hover:bg-amber-100 hover:ring-amber-200",
+};
+
+const ActionButton = ({
+  children,
+  icon: Icon,
+  tone = "secondary",
+  className = "",
+  ...props
+}) => (
+  <button
+    type="button"
+    className={`${actionButtonBase} ${
+      actionButtonStyles[tone] || actionButtonStyles.secondary
+    } ${className}`}
+    {...props}
+  >
+    {Icon && <Icon size={16} aria-hidden="true" />}
+    <span>{children}</span>
+  </button>
+);
+
+const SkeletonBlock = ({ className = "" }) => (
+  <div
+    className={`animate-pulse rounded-lg bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%] ${className}`}
+  />
+);
+
+export const ProjectListSkeleton = () => (
+  <div className="space-y-4">
+    {[0, 1, 2].map((item) => (
+      <div
+        key={item}
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+      >
+        <div className="flex items-center gap-4">
+          <SkeletonBlock className="h-11 w-11 shrink-0 rounded-lg" />
+          <div className="min-w-0 flex-1 space-y-3">
+            <SkeletonBlock className="h-4 w-2/3 max-w-sm" />
+            <SkeletonBlock className="h-3 w-32" />
+          </div>
+          <SkeletonBlock className="hidden h-8 w-28 sm:block" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const GammeRowsSkeleton = () => (
+  <div className="space-y-3">
+    {[0, 1, 2].map((item) => (
+      <div
+        key={item}
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <SkeletonBlock className="h-10 w-10 shrink-0 rounded-lg" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <SkeletonBlock className="h-4 w-64 max-w-full" />
+              <SkeletonBlock className="h-3 w-full max-w-xl" />
+              <SkeletonBlock className="h-3 w-2/3 max-w-md" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+            <SkeletonBlock className="h-10 w-full sm:w-24" />
+            <SkeletonBlock className="h-10 w-full sm:w-32" />
+            <SkeletonBlock className="h-10 w-full sm:w-28" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+export const EmptyProjectsIllustration = () => (
+  <div className="relative flex h-24 w-24 items-center justify-center">
+    <div className="absolute inset-0 rounded-full bg-[#243782]/10" />
+    <div className="absolute left-4 top-5 h-14 w-16 rounded-lg border border-[#243782]/25 bg-white shadow-sm" />
+    <FolderOpen className="relative text-[#243782]" size={42} strokeWidth={1.7} />
+    <Sparkles className="absolute right-3 top-3 text-amber-400" size={18} />
+  </div>
+);
+
+const EmptyGammesState = () => (
+  <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+    <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50">
+      <SearchX className="text-slate-400" size={34} strokeWidth={1.7} />
+    </div>
+    <p className="text-sm font-bold text-slate-700">
+      Aucune gamme creee pour ce projet.
+    </p>
+    <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-slate-500">
+      Les gammes importees ou creees apparaitront ici avec leurs exports,
+      dates et actions de validation.
+    </p>
+  </div>
+);
+
+const getGammeStatus = (gamme = {}) =>
+  gamme.cotation_status ||
+  gamme.status_cotation ||
+  gamme.resultat_validation ||
+  gamme.resultat ||
+  "A_coter";
+
+const statusPillStyles = {
+  OK: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+  NOK: "bg-red-100 text-red-800 ring-red-200",
+  NOK_mineur: "bg-orange-100 text-orange-800 ring-orange-200",
+  Non_cote: "bg-gray-100 text-gray-700 ring-gray-200",
+  "Non_cot\u00c3\u0192\u00c2\u00a9": "bg-gray-100 text-gray-700 ring-gray-200",
+  A_coter: "bg-slate-950 text-white ring-slate-950",
+  A_traiter: "bg-slate-950 text-white ring-slate-950",
+  IN_PROGRESS: "bg-slate-950 text-white ring-slate-950",
+};
+
+const statusLabels = {
+  OK: "OK",
+  NOK: "NOK",
+  NOK_mineur: "NOK Mineur",
+  Non_cote: "Non cote",
+  "Non_cot\u00c3\u0192\u00c2\u00a9": "Non cote",
+  A_coter: "A coter",
+  A_traiter: "A coter",
+  IN_PROGRESS: "A coter",
+};
+
+const GammeStatusPill = ({ gamme }) => {
+  const status = getGammeStatus(gamme);
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold ring-1 ${
+        statusPillStyles[status] || statusPillStyles.A_coter
+      }`}
+    >
+      {statusLabels[status] || status}
+    </span>
+  );
+};
 
 export const ListeGammesProjects = ({
   projets,
@@ -32,7 +196,7 @@ export const ListeGammesProjects = ({
   onOpenComments,
   onNavigate,
 }) => (
-  <div className="space-y-5">
+  <div className="space-y-4 sm:space-y-5">
     {projets.map((projet) => (
       <ProjectCard
         key={projet.id}
@@ -85,44 +249,42 @@ const ProjectCard = ({
   onNavigate,
   gammesLoaded,
 }) => (
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+  <div className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-xl motion-safe:hover:shadow-slate-200/70">
     <button
       type="button"
       onClick={() => onToggleProject(projet.id)}
-      className="w-full flex items-center justify-between px-6 py-5 hover:bg-slate-50 transition-colors"
+      className="flex w-full flex-col gap-4 px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5"
     >
-      <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-          <BsFolderFill size={20} />
+      <div className="flex min-w-0 items-start gap-4 sm:items-center">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#243782]/10 text-[#243782] ring-1 ring-[#243782]/15 transition-transform duration-300 group-hover:scale-105">
+          <FolderOpen size={21} strokeWidth={1.8} />
         </div>
 
-        <div className="text-left">
-          <h2 className="text-lg font-bold text-slate-800">
+        <div className="min-w-0">
+          <h2 className="truncate text-base font-bold text-slate-900 sm:text-lg">
             {getProjectName(projet)}
           </h2>
 
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="mt-1 text-xs font-medium text-slate-400">
             ID Projet : {projet.id}
           </p>
 
           {getRoleBadge?.(projet) && (
-            <span className="mt-2 inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+            <span className="mt-2 inline-flex rounded-full bg-[#243782]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#243782]">
               {getRoleBadge(projet)}
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-          {gammesLoaded ? `${gammes.length} gamme(s)` : "Cliquer pour charger"}
+      <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+        <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">
+          {gammesLoaded ? `${gammes.length} gamme(s)` : "Afficher les gammes"}
         </span>
 
-        {isOpen ? (
-          <BsChevronDown className="text-slate-500" />
-        ) : (
-          <BsChevronRight className="text-slate-500" />
-        )}
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-transform duration-300 group-hover:border-[#243782]/25 group-hover:text-[#243782]">
+          {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+        </span>
       </div>
     </button>
 
@@ -167,31 +329,31 @@ const GammesPanel = ({
   onOpenComments,
   onNavigate,
 }) => (
-  <div className="border-t border-slate-100 bg-slate-50 px-6 py-5">
-    <div className="mb-4 flex justify-end">
-      <button
-        type="button"
+  <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-4 sm:px-6 sm:py-5">
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+          Gammes du projet
+        </p>
+        <p className="mt-1 text-sm font-semibold text-slate-700">
+          Planification, validation, commentaires et exports.
+        </p>
+      </div>
+      <ActionButton
         onClick={() => onDownloadProjectKPI(projet)}
         disabled={downloadingProjectKPI?.[projet.id]}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-60"
+        icon={Download}
+        tone="primary"
+        className="w-full sm:w-auto"
       >
-        <Download size={14} />
-        {downloadingProjectKPI?.[projet.id] ? "Chargement..." : "KPI Projet"}
-      </button>
+        {downloadingProjectKPI?.[projet.id] ? "Preparation..." : "KPI Projet"}
+      </ActionButton>
     </div>
 
-    {isLoadingGammes && (
-      <div className="flex items-center justify-center gap-3 py-8">
-        <div className="animate-spin h-7 w-7 border-b-2 border-blue-600 rounded-full" />
-
-        <span className="text-sm text-slate-500">Chargement des gammes...</span>
-      </div>
-    )}
+    {isLoadingGammes && <GammeRowsSkeleton />}
 
     {!isLoadingGammes && gammes.length === 0 && (
-      <div className="py-8 text-center text-sm text-slate-400">
-        Aucune gamme créée pour ce projet.
-      </div>
+      <EmptyGammesState />
     )}
 
     {!isLoadingGammes && gammes.length > 0 && (
@@ -290,7 +452,7 @@ const GammeDatesEditor = ({
 
   if (!canEditDates) {
     return (
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
         <span className="inline-flex items-center gap-1">
           <CalendarDays size={13} />
           Debut : <b>{formatDateLabel(gamme.date_debut)}</b>
@@ -304,53 +466,55 @@ const GammeDatesEditor = ({
   }
 
   return (
-    <div className="mt-3 flex flex-wrap items-end gap-2">
-      <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500">
+    <div className="mt-4 flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <label className="flex min-w-[132px] flex-1 flex-col gap-1 text-[11px] font-semibold text-slate-500 sm:flex-none">
         Debut
         <input
           type="date"
           value={draft.date_debut}
           onChange={(event) => handleChange("date_debut", event.target.value)}
-          className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400"
+          className="h-9 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500">
+      <label className="flex min-w-[132px] flex-1 flex-col gap-1 text-[11px] font-semibold text-slate-500 sm:flex-none">
         Fin
         <input
           type="date"
           value={draft.date_fin}
           onChange={(event) => handleChange("date_fin", event.target.value)}
-          className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400"
+          className="h-9 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-[#243782]/15"
         />
       </label>
 
       {isDirty && (
         <>
-          <button
-            type="button"
+          <ActionButton
             onClick={handleSave}
             disabled={hasInvalidRange || isSavingDates}
             title="Enregistrer les dates"
-            className="inline-flex h-8 items-center justify-center rounded-md bg-indigo-100 text-indigo-700 hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-50"
+            icon={Save}
+            tone="primary"
+            className="min-h-9 px-3 py-2"
           >
-            <Save size={14} />
-          </button>
+            Sauver
+          </ActionButton>
 
-          <button
-            type="button"
+          <ActionButton
             onClick={handleReset}
             disabled={isSavingDates}
             title="Annuler"
-            className="inline-flex h-8 items-center justify-center rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+            icon={RotateCcw}
+            tone="secondary"
+            className="min-h-9 px-3 py-2"
           >
-            <RotateCcw size={14} />
-          </button>
+            Reset
+          </ActionButton>
         </>
       )}
 
       {isSavingDates && (
-        <span className="pb-2 text-[11px] font-semibold text-indigo-600">
+        <span className="pb-2 text-[11px] font-semibold text-[#243782]">
           Enregistrement...
         </span>
       )}
@@ -378,44 +542,48 @@ const GammeRow = ({
   onOpenComments,
   onNavigate,
 }) => (
-  <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-    <div className="flex items-start gap-3 min-w-0">
-      <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
-        <BsFileEarmarkSpreadsheetFill size={18} />
+  <div className="group/row flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-[#243782]/25 motion-safe:hover:shadow-lg sm:p-5 xl:flex-row xl:items-center xl:justify-between">
+    <div className="flex min-w-0 items-start gap-3">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 transition-transform duration-300 group-hover/row:scale-105">
+        <FileSpreadsheet size={18} strokeWidth={1.8} />
       </div>
 
-      <div className="min-w-0">
-        <h3
-          onClick={() => onNavigate(`/visualiser/${gamme.id}`)}
-          className="font-bold text-blue-700 hover:underline cursor-pointer truncate"
-        >
-          {getGammeName(gamme)}
-        </h3>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3
+            onClick={() => onNavigate(`/visualiser/${gamme.id}`)}
+            className="inline-flex max-w-full cursor-pointer items-center gap-2 truncate text-sm font-bold text-[#243782] transition-colors hover:text-[#00133B] sm:text-base"
+          >
+            <Eye size={15} className="shrink-0" />
+            {getGammeName(gamme)}
+          </h3>
+          <GammeStatusPill gamme={gamme} />
+        </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-500">
+        <div className="mt-3 grid gap-2 text-xs text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
           <span>
             Type :{" "}
-            <b>{gamme.type_procedure || gamme.type_procedure_nom || "—"}</b>
+            <b>{gamme.type_procedure || gamme.type_procedure_nom || "-"}</b>
           </span>
 
           <span>
             Fonction :{" "}
-            <b>{gamme.fonction || gamme.fonction_gamme_nom || "—"}</b>
+            <b>{gamme.fonction || gamme.fonction_gamme_nom || "-"}</b>
           </span>
 
           <span>
-            Véhicule : <b>{gamme.vehicule?.cmq || gamme.vehicule_nom || "—"}</b>
+            Vehicule : <b>{gamme.vehicule?.cmq || gamme.vehicule_nom || "-"}</b>
           </span>
 
           <span>
-            Jours : <b>{gamme.nombre_jours || "—"}</b>
+            Jours : <b>{gamme.nombre_jours || "-"}</b>
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-slate-400">
-          <span>Pistes : {gamme.pistes || "—"}</span>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-400">
+          <span>Pistes : {gamme.pistes || "-"}</span>
 
-          <span>Boîtiers : {gamme.boitiers || "—"}</span>
+          <span>Boitiers : {gamme.boitiers || "-"}</span>
         </div>
 
         <GammeDatesEditor
@@ -427,40 +595,36 @@ const GammeRow = ({
       </div>
     </div>
 
-    <div className="flex items-center gap-2 flex-wrap justify-end">
-      <button
-        type="button"
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:flex xl:flex-wrap xl:justify-end">
+      <ActionButton
         onClick={() => onDownloadKPI(gamme)}
         disabled={isDownloadingKPI}
-        className="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-xs font-bold flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed"
+        icon={Download}
+        tone="primary"
       >
-        <Download size={16} />
-        {isDownloadingKPI ? "Chargement..." : "KPI"}
-      </button>
+        {isDownloadingKPI ? "Preparation..." : "KPI"}
+      </ActionButton>
 
-      <button
-        type="button"
+      <ActionButton
         onClick={() => onDownloadModifiedExcel(gamme)}
         disabled={isDownloadingExcel}
-        className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed"
+        icon={FileDown}
+        tone="secondary"
       >
-        <Download size={16} />
         {isDownloadingExcel ? "Generation..." : "Excel modifie"}
-      </button>
+      </ActionButton>
 
-      <button
-        type="button"
+      <ActionButton
         onClick={() => onNavigate(`/validation/${gamme.id}`)}
-        className="px-3 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 text-xs font-bold flex items-center gap-1"
+        icon={CheckCircle2}
+        tone="success"
       >
-        <BsCheckCircleFill />
         Validation
-      </button>
+      </ActionButton>
 
       {!isPPL && (
         <>
-          <button
-            type="button"
+          <ActionButton
             onClick={() =>
               onOpenComments({
                 gammeId: gamme.id,
@@ -469,13 +633,13 @@ const GammeRow = ({
                 title: "Commentaires besoins techniques",
               })
             }
-            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200 transition-colors"
+            icon={MessageSquareText}
+            tone="info"
           >
             Besoins techniques
-          </button>
+          </ActionButton>
 
-          <button
-            type="button"
+          <ActionButton
             onClick={() =>
               onOpenComments({
                 gammeId: gamme.id,
@@ -484,10 +648,11 @@ const GammeRow = ({
                 title: "Commentaires pistes",
               })
             }
-            className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-200 transition-colors"
+            icon={Map}
+            tone="warning"
           >
             Les pistes
-          </button>
+          </ActionButton>
         </>
       )}
     </div>
@@ -498,8 +663,8 @@ export const CommentsModal = ({ commentModal, onClose }) => {
   if (!commentModal.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl relative shadow-xl overflow-hidden">
+    <div className="modal-backdrop">
+      <div className="modal-sheet relative sm:max-w-2xl">
         <button
           type="button"
           onClick={onClose}
@@ -539,9 +704,9 @@ const kpiRowStyles = {
   ok: "bg-emerald-100 text-emerald-800",
   nok: "bg-red-100 text-red-700",
   minor: "bg-orange-100 text-amber-800",
-  progress: "bg-blue-100 text-blue-800",
+  progress: "bg-[#243782]/15 text-blue-800",
   neutral: "bg-slate-200 text-slate-700",
-  pending: "bg-yellow-100 text-yellow-800",
+  pending: "bg-slate-950 text-white",
 };
 
 const KpiSummaryTable = ({ title, rows, firstColumnLabel, total }) => (
@@ -669,14 +834,14 @@ const KpiProgressBar = ({ summary = {} }) => {
         <span className="text-sm font-bold text-slate-700">
           Avancement global
         </span>
-        <span className="text-sm font-extrabold text-indigo-700">
+        <span className="text-sm font-extrabold text-[#243782]">
           {formatKpiPercent(percent)}
         </span>
       </div>
 
       <div className="h-3 overflow-hidden rounded-full bg-slate-200">
         <div
-          className="h-full rounded-full bg-indigo-600 transition-all duration-500"
+          className="h-full rounded-full bg-[#243782] transition-all duration-500"
           style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
         />
       </div>
@@ -699,11 +864,11 @@ export const GammeKpiModal = ({ modal, isExporting, onClose, onExport }) => {
   const cotationRows = buildCotationRows(summary);
 
   return (
-    <div className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-50 rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl shadow-slate-950/35 ring-1 ring-white/40 overflow-hidden flex flex-col">
+    <div className="modal-backdrop">
+      <div className="modal-sheet flex flex-col bg-slate-50 sm:max-w-4xl">
         <div className="bg-white border-b border-slate-200 px-6 py-5 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#243782]">
               KPI de la gamme
             </p>
             <h3 className="mt-1 text-xl font-extrabold text-slate-800 truncate">
@@ -740,23 +905,22 @@ export const GammeKpiModal = ({ modal, isExporting, onClose, onExport }) => {
           </div>
         </div>
 
-        <div className="bg-white border-t border-slate-200 px-6 py-4 flex justify-end gap-3">
-          <button
-            type="button"
+        <div className="flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-4 sm:flex-row sm:justify-end">
+          <ActionButton
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-slate-200"
+            icon={X}
+            tone="secondary"
           >
             Fermer
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
             onClick={() => onExport(gamme)}
             disabled={isExporting}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+            icon={Download}
+            tone="primary"
           >
-            <Download size={16} />
             {isExporting ? "Export..." : "Exporter Excel"}
-          </button>
+          </ActionButton>
         </div>
       </div>
     </div>
@@ -791,7 +955,7 @@ const ProjectExportProgress = ({ job }) => {
         >
           {labels[job.status] || "Preparation de l'export"}
         </span>
-        <span className="text-sm font-extrabold text-indigo-700">
+        <span className="text-sm font-extrabold text-[#243782]">
           {progress}%
         </span>
       </div>
@@ -803,7 +967,7 @@ const ProjectExportProgress = ({ job }) => {
               ? "bg-red-600"
               : isSuccess
               ? "bg-emerald-600"
-              : "bg-indigo-600"
+              : "bg-[#243782]"
           }`}
           style={{ width: `${progress}%` }}
         />
@@ -830,11 +994,11 @@ export const ProjectKpiModal = ({
     exportJob?.status === "SUCCESS" && exportJob?.download_ready;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-50 rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl shadow-slate-950/35 ring-1 ring-white/40 overflow-hidden flex flex-col">
+    <div className="modal-backdrop">
+      <div className="modal-sheet flex flex-col bg-slate-50 sm:max-w-4xl">
         <div className="bg-white border-b border-slate-200 px-6 py-5 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#243782]">
               KPI du projet
             </p>
             <h3 className="mt-1 text-xl font-extrabold text-slate-800 truncate">
@@ -874,21 +1038,20 @@ export const ProjectKpiModal = ({
           </div>
         </div>
 
-        <div className="bg-white border-t border-slate-200 px-6 py-4 flex justify-end gap-3">
-          <button
-            type="button"
+        <div className="flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-4 sm:flex-row sm:justify-end">
+          <ActionButton
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-slate-200"
+            icon={X}
+            tone="secondary"
           >
             Fermer
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
             onClick={() => onExport(project)}
             disabled={isExporting || isCreating}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+            icon={Download}
+            tone="primary"
           >
-            <Download size={16} />
             {isExporting
               ? `Export ${Number(exportJob?.progress || 0)}%`
               : isCreating
@@ -896,7 +1059,7 @@ export const ProjectKpiModal = ({
               : isReady
               ? "Telecharger Excel"
               : "Exporter Excel"}
-          </button>
+          </ActionButton>
         </div>
       </div>
     </div>
@@ -935,8 +1098,8 @@ export const SyntheseModal = ({ syntheseModal, onClose }) => {
   const variant = variants[syntheseModal.type] || variants.info;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+    <div className="modal-backdrop">
+      <div className="modal-sheet sm:max-w-md">
         <div className={`px-6 py-5 border-b border-slate-100 ${variant.header}`}>
           <h3 className={`text-sm font-bold ${variant.title}`}>
             {syntheseModal.title || variant.defaultTitle}
@@ -953,8 +1116,9 @@ export const SyntheseModal = ({ syntheseModal, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className={`px-4 py-2 rounded-lg text-white text-sm font-semibold ${variant.button}`}
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md ${variant.button}`}
           >
+            <CheckCircle2 size={16} />
             Compris
           </button>
         </div>
@@ -962,3 +1126,5 @@ export const SyntheseModal = ({ syntheseModal, onClose }) => {
     </div>
   );
 };
+
+

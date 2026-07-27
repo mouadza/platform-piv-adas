@@ -92,11 +92,11 @@ const ChoixEspace = () => {
         <div className="w-full max-w-4xl rounded-lg border border-white/50 bg-white/95 p-6 shadow-2xl backdrop-blur sm:p-8">
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-[#243782]/10 px-3 py-1.5 text-sm font-semibold text-[#243782]">
                 <ShieldCheck size={16} />
                 Selection de l'espace
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-950">
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-950">
                 Choisir votre espace de travail
               </h1>
               <p className="mt-2 text-sm text-slate-500">
@@ -126,7 +126,7 @@ const ChoixEspace = () => {
               {Object.entries(grouped).map(([role, projects]) => (
                 <div
                   key={role}
-                  className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+                  className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#243782]/25 hover:shadow-md"
                 >
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
@@ -158,7 +158,7 @@ const ChoixEspace = () => {
                     <button
                       type="button"
                       onClick={() => handleAccess(role)}
-                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#243782] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#00133B]"
                     >
                       Acceder
                       <ArrowRight size={16} />
@@ -175,3 +175,5 @@ const ChoixEspace = () => {
 };
 
 export default ChoixEspace;
+
+

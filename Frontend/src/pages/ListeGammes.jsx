@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronRight, Home, ListChecks } from "lucide-react";
 
 import DashboardLayout from "../components/DashboardLayout";
 import {
   CommentsModal,
+  EmptyProjectsIllustration,
   GammeKpiModal,
   ListeGammesProjects,
+  ProjectListSkeleton,
   ProjectKpiModal,
   SyntheseModal,
 } from "../components/listeGammes/ListeGammesContent";
@@ -265,26 +268,56 @@ const ListeGammes = () => {
 
   return (
     <DashboardLayout role={userRole}>
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">
-              Liste des gammes
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Consultez les gammes organisees par projet.
-            </p>
+      <div className="space-y-6 pb-8">
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <nav
+                className="mb-2 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400"
+                aria-label="Fil d'Ariane"
+              >
+                <span className="inline-flex items-center gap-1">
+                  <Home size={13} />
+                  Tableau de bord
+                </span>
+                <ChevronRight size={13} />
+                <span className="inline-flex items-center gap-1 text-[#243782]">
+                  <ListChecks size={13} />
+                  Gammes par projet
+                </span>
+              </nav>
+
+              <h1 className="truncate text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+                Suivi des gammes par projet
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Consultez les gammes de chaque projet, planifiez les dates et
+                accedez aux validations et aux exports KPI.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Projets
+                </p>
+                <p className="mt-1 text-xl font-extrabold text-slate-900">
+                  {loading ? "--" : projets.length}
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Projets affiches
+                </p>
+                <p className="mt-1 text-xl font-extrabold text-[#243782]">
+                  {Object.values(openedProjects).filter(Boolean).length}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {loading && (
-          <div className="flex justify-center items-center gap-3 py-16">
-            <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full" />
-            <span className="text-slate-500 font-medium">
-              Chargement des projets...
-            </span>
-          </div>
-        )}
+        {loading && <ProjectListSkeleton />}
 
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm font-semibold">
@@ -293,10 +326,14 @@ const ListeGammes = () => {
         )}
 
         {!loading && projets.length === 0 && (
-          <div className="border border-dashed border-slate-300 rounded-2xl py-16 flex flex-col items-center justify-center bg-slate-50">
-            <span className="text-4xl mb-3">Dossier</span>
-            <span className="text-slate-500 font-medium">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
+            <EmptyProjectsIllustration />
+            <span className="mt-5 text-base font-bold text-slate-800">
               Aucun projet trouve.
+            </span>
+            <span className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+              Les projets disponibles pour votre role seront affiches ici avec
+              leurs gammes et exports associes.
             </span>
           </div>
         )}
@@ -366,3 +403,4 @@ const ListeGammes = () => {
 };
 
 export default ListeGammes;
+

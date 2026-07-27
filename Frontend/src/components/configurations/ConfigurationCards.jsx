@@ -18,25 +18,25 @@ const ConfirmModal = ({ open, title, message, onConfirm, onCancel }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+    <div className="modal-backdrop">
+      <div className="modal-sheet p-6 sm:max-w-sm">
+        <h3 className="mb-2 text-lg font-extrabold text-slate-950">
           {title}
         </h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="mb-6 text-sm text-slate-600">
           {message}
         </p>
 
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="rounded-md px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+            className="btn-secondary"
           >
             Annuler
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
           >
             Supprimer
           </button>
@@ -87,17 +87,17 @@ const ConfigCard = ({
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col">
+      <div className="flex flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-lg font-extrabold text-slate-950">{title}</h3>
           {description && (
-            <p className="text-sm text-gray-500">{description}</p>
+            <p className="text-sm text-slate-500">{description}</p>
           )}
         </div>
 
         <div className="overflow-x-auto mb-4">
           <table className="w-full min-w-[400px] text-sm">
-            <thead className="bg-gray-100 text-gray-700">
+            <thead className="bg-[#00133B] text-white">
               <tr>
                 <th className="px-4 py-2 text-left">Nom</th>
                 <th className="px-4 py-2 text-right">Actions</th>
@@ -106,19 +106,19 @@ const ConfigCard = ({
             <tbody>
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={2} className="px-4 py-4 text-center text-gray-400">
+                  <td colSpan={2} className="px-4 py-4 text-center text-slate-400">
                     Aucun élément
                   </td>
                 </tr>
               ) : (
                 items.map((it) => (
-                  <tr key={it.id} className="border-t hover:bg-gray-50">
+                  <tr key={it.id} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="px-4 py-2">
                       {editingId === it.id ? (
                         <input
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-full rounded border px-2 py-1"
+                          className="field-control"
                           autoFocus
                         />
                       ) : (
@@ -130,13 +130,13 @@ const ConfigCard = ({
                         <>
                           <button
                             onClick={() => saveEdit(it.id)}
-                            className="text-green-600 hover:text-green-800 mr-3"
+                            className="text-sm font-bold text-emerald-700 hover:text-emerald-800 mr-3"
                           >
                             Enregistrer
                           </button>
                           <button
                             onClick={() => setEditingId(null)}
-                            className="text-gray-500 hover:text-gray-700"
+                            className="text-sm font-bold text-slate-500 hover:text-slate-700"
                           >
                             Annuler
                           </button>
@@ -148,13 +148,13 @@ const ConfigCard = ({
                               setEditingId(it.id);
                               setEditValue(it[fieldName]);
                             }}
-                            className="text-blue-600 hover:text-blue-800 mr-3"
+                            className="text-sm font-bold text-[#243782] hover:text-[#00133B] mr-3"
                           >
                             Modifier
                           </button>
                           <button
                             onClick={() => setDeleteId(it.id)}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-sm font-bold text-red-600 hover:text-red-800"
                           >
                             Supprimer
                           </button>
@@ -175,11 +175,11 @@ const ConfigCard = ({
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
             placeholder="Nouvelle valeur"
-            className="w-full rounded-md border px-3 py-2 text-sm"
+            className="field-control"
           />
           <button
             onClick={create}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="btn-primary"
           >
             Ajouter
           </button>
@@ -268,19 +268,19 @@ const RoleConfigCard = ({ roles, reload }) => {
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col">
+      <div className="flex flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         {/* Header */}
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Rôles</h3>
-          <p className="text-sm text-gray-500">
-            Gestion des rôles utilisateurs
+          <h3 className="text-lg font-extrabold text-slate-950">Roles</h3>
+          <p className="text-sm text-slate-500">
+            Gestion des roles utilisateurs
           </p>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto mb-4">
           <table className="min-w-[520px] w-full text-sm">
-            <thead className="bg-gray-100 text-gray-700">
+            <thead className="bg-[#00133B] text-white">
               <tr>
                 <th className="px-4 py-2 text-left">Label</th>
                 <th className="px-4 py-2 text-left">Access level</th>
@@ -290,27 +290,27 @@ const RoleConfigCard = ({ roles, reload }) => {
             <tbody>
               {roles.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-4 text-center text-gray-400">
-                    Aucun rôle
+                  <td colSpan={3} className="px-4 py-4 text-center text-slate-400">
+                    Aucun role
                   </td>
                 </tr>
               ) : (
                 roles.map((role) => (
-                  <tr key={role.id} className="border-t hover:bg-gray-50">
+                  <tr key={role.id} className="border-t border-slate-100 hover:bg-slate-50">
                     {/* Label */}
                     <td className="px-4 py-2">
                       {editingId === role.id ? (
                         <input
                           value={label}
                           onChange={(e) => setLabel(e.target.value)}
-                          className="w-full rounded border px-2 py-1 text-sm"
+                          className="field-control"
                           autoFocus
                         />
                       ) : (
                         <div className="flex items-center gap-2">
                           {role.label}
                           {role.is_system && (
-                            <span className="text-xs bg-gray-200 px-2 rounded">
+                            <span className="rounded bg-slate-100 px-2 text-xs">
                               système
                             </span>
                           )}
@@ -325,7 +325,7 @@ const RoleConfigCard = ({ roles, reload }) => {
                           value={accessLevel}
                           onChange={(e) => setAccessLevel(e.target.value)}
                           disabled={role.is_system}
-                          className="w-full rounded border px-2 py-1 text-sm"
+                          className="field-control"
                         >
                           {ACCESS_LEVELS.map((a) => (
                             <option key={a.value} value={a.value}>
@@ -345,13 +345,13 @@ const RoleConfigCard = ({ roles, reload }) => {
                           <>
                             <button
                               onClick={() => saveEdit(role)}
-                              className="text-green-600 hover:text-green-800"
+                              className="text-sm font-bold text-emerald-700 hover:text-emerald-800"
                             >
                               Enregistrer
                             </button>
                             <button
                               onClick={cancelEdit}
-                              className="text-gray-500 hover:text-gray-700"
+                              className="text-sm font-bold text-slate-500 hover:text-slate-700"
                             >
                               Annuler
                             </button>
@@ -360,14 +360,14 @@ const RoleConfigCard = ({ roles, reload }) => {
                           <>
                             <button
                               onClick={() => startEdit(role)}
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-sm font-bold text-[#243782] hover:text-[#00133B]"
                             >
                               Modifier
                             </button>
                             {!role.is_system && (
                               <button
                                 onClick={() => setDeleteId(role.id)}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-sm font-bold text-red-600 hover:text-red-800"
                               >
                                 Supprimer
                               </button>
@@ -390,22 +390,22 @@ const RoleConfigCard = ({ roles, reload }) => {
 
         {/* Add role */}
         <div className="mt-auto border-t pt-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-            Ajouter un rôle
+          <h4 className="mb-2 text-sm font-bold text-slate-700">
+            Ajouter un role
           </h4>
 
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="Nom du rôle"
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              placeholder="Nom du role"
+              className="field-control"
             />
 
             <select
               value={newAccess}
               onChange={(e) => setNewAccess(e.target.value)}
-              className="w-full sm:w-48 rounded-md border px-2 py-2 text-sm"
+              className="field-control sm:w-48"
             >
               {ACCESS_LEVELS.map((a) => (
                 <option key={a.value} value={a.value}>
@@ -416,7 +416,7 @@ const RoleConfigCard = ({ roles, reload }) => {
 
             <button
               onClick={createRole}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="btn-primary"
             >
               Ajouter
             </button>
@@ -427,8 +427,8 @@ const RoleConfigCard = ({ roles, reload }) => {
       {/* Delete Modal */}
       <ConfirmModal
         open={deleteId !== null}
-        title="Suppression du rôle"
-        message="Ce rôle sera définitivement supprimé."
+        title="Suppression du role"
+        message="Ce role sera définitivement supprimé."
         onCancel={() => setDeleteId(null)}
         onConfirm={() => {
           configAPI.roles.delete(deleteId).then(reload);
@@ -441,3 +441,6 @@ const RoleConfigCard = ({ roles, reload }) => {
 
 
 export { ConfigCard, RoleConfigCard };
+
+
+

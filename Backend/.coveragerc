@@ -1,11 +1,11 @@
 [run]
-source = admin_config
+source = validation_core
 omit =
     */migrations/*
     */tests/*
     */__pycache__/*
     manage.py
-    validationplateform/*
+    validation_platform/*
 
 [report]
 show_missing = True

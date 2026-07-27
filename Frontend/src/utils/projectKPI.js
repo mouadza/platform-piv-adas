@@ -2,12 +2,16 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const COTATION_FIELDS = [
   "Cotation (Résultats)",
-  "Cotation (RÃ©sultats)",
+  "Cotation (R\u00c3\u00a9sultats)",
 ];
 
 const STEP_FIELDS = ["Nom (Steps)"];
 
-const NON_COTE_VALUES = ["Non_coté", "Non_cotÃ©", "Non_cotÃƒÂ©"];
+const NON_COTE_VALUES = [
+  "Non_coté",
+  "Non_cot\u00c3\u00a9",
+  "Non_cot\u00c3\u0192\u00c2\u00a9",
+];
 
 const normalizeCotation = (value) => {
   if (!value) return "A_coter";

@@ -9,6 +9,7 @@ const BlocNavigation = ({
   onNext,
   onPrev,
   onFinish,
+  compact = false,
 }) => {
   const progress = ((currentBlocIndex + 1) / blocs.length) * 100;
   const currentBloc = blocs[currentBlocIndex];
@@ -33,14 +34,20 @@ const BlocNavigation = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mb-5 sticky z-10">
-      <div className="flex items-center gap-3 p-4">
+    <div
+      className={`rounded-lg border border-slate-200 bg-white shadow-sm ${
+        compact ? "" : "sticky top-0 z-10"
+      }`}
+    >
+      <div className={`flex items-center gap-3 ${compact ? "p-2" : "p-3 sm:p-4"}`}>
         <button
           onClick={handlePrev}
           disabled={currentBlocIndex === 0}
-          className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-800 disabled:opacity-30 hover:bg-slate-200 active:scale-95 transition-all"
+          className={`flex flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-all hover:border-[#243782]/25 hover:text-[#243782] active:scale-95 disabled:opacity-30 ${
+            compact ? "h-9 w-9" : "h-10 w-10 sm:h-12 sm:w-12"
+          }`}
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={compact ? 18 : 20} />
         </button>
 
         <div className="flex-1 min-w-0">
@@ -56,13 +63,13 @@ const BlocNavigation = ({
             )}
           </div>
 
-          <h2 className="text-base font-bold text-slate-800 truncate">
+          <h2 className="truncate text-base font-extrabold text-slate-900">
             {currentBloc?.title || `Bloc ${currentBlocIndex + 1}`}
           </h2>
 
-          <div className="mt-2.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className={`${compact ? "mt-1.5" : "mt-2.5"} h-1.5 w-full overflow-hidden rounded-full bg-slate-100`}>
             <div
-              className="bg-sky-500 h-1.5 rounded-full transition-all duration-500 ease-out"
+              className="h-1.5 rounded-full bg-[#243782] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -71,16 +78,20 @@ const BlocNavigation = ({
         {isLastBloc ? (
           <button
             onClick={onFinish}
-            className="flex-shrink-0 h-12 px-5 flex items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 transition-all shadow-sm shadow-emerald-200 text-sm font-bold"
+            className={`flex flex-shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 active:scale-95 ${
+              compact ? "h-9 px-4" : "h-12 px-5"
+            }`}
           >
             Terminer
           </button>
         ) : (
           <button
             onClick={handleNext}
-            className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-sky-500 text-white hover:bg-sky-600 active:scale-95 transition-all shadow-sm shadow-sky-200"
+            className={`flex flex-shrink-0 items-center justify-center rounded-lg bg-[#243782] text-white shadow-sm transition-all hover:bg-[#00133B] active:scale-95 ${
+              compact ? "h-9 w-9" : "h-10 w-10 sm:h-12 sm:w-12"
+            }`}
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={compact ? 18 : 20} />
           </button>
         )}
       </div>
@@ -89,3 +100,5 @@ const BlocNavigation = ({
 };
 
 export default BlocNavigation;
+
+

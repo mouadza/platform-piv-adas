@@ -25,7 +25,7 @@ const CreerGamme = () => {
     load();
   }, [id]);
 
-  // GammeForm already builds and sends a FormData — receive it directly
+  // GammeForm already builds and sends a FormData - receive it directly
   const handleSubmit = async (formData) => {
     try {
       await gammesAPI.import(formData);
@@ -42,7 +42,7 @@ const CreerGamme = () => {
     <DashboardLayout role={userRole}>
       <button
         onClick={() => navigate(-1)}
-        className="text-blue-600 text-sm font-semibold hover:underline"
+        className="text-[#243782] text-sm font-semibold hover:underline"
       >
         ← Retour
       </button>
@@ -69,3 +69,4 @@ const CreerGamme = () => {
 };
 
 export default CreerGamme;
+

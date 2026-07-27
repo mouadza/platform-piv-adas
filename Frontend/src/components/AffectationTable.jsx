@@ -53,10 +53,10 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
         {affectations.map((aff, index) => (
           <div
             key={aff._key}
-            className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm"
+            className="space-y-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
           >
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">
                 Projet
               </label>
               <select
@@ -64,7 +64,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
                 onChange={(e) =>
                   handleChange(index, "projet", e.target.value === "" ? "" : Number(e.target.value))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="field-control"
               >
                 <option value="">-- Sélectionner --</option>
                 {projects.map((proj) => (
@@ -76,7 +76,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              <label className="block text-xs font-bold text-slate-600 mb-1.5">
                 Rôle
               </label>
               <select
@@ -84,7 +84,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
                 onChange={(e) =>
                   handleChange(index, "role", e.target.value === "" ? "" : Number(e.target.value))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="field-control"
                 disabled={loadingRoles}
               >
                 <option value="">-- Rôle --</option>
@@ -100,7 +100,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
               <button
                 type="button"
                 onClick={() => removeRow(index)}
-                className="flex-1 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 border border-red-200 px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700 transition-colors hover:bg-red-100"
               >
                 <Trash2 size={16} />
                 Supprimer
@@ -111,17 +111,17 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
-          <thead className="bg-gray-100">
+      <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
+        <table className="w-full overflow-hidden">
+          <thead className="bg-[#00133B] text-white">
             <tr>
-              <th className="p-3 sm:p-4 text-left text-xs sm:text-sm font-semibold text-gray-700">
+              <th className="p-3 text-left text-xs font-bold uppercase tracking-wide sm:p-4">
                 Projet
               </th>
-              <th className="p-3 sm:p-4 text-left text-xs sm:text-sm font-semibold text-gray-700">
+              <th className="p-3 text-left text-xs font-bold uppercase tracking-wide sm:p-4">
                 Rôle
               </th>
-              <th className="p-3 sm:p-4 text-center text-xs sm:text-sm font-semibold text-gray-700">
+              <th className="p-3 text-center text-xs font-bold uppercase tracking-wide sm:p-4">
                 Action
               </th>
             </tr>
@@ -129,7 +129,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
 
           <tbody>
             {affectations.map((aff, index) => (
-              <tr key={aff._key} className="border-t hover:bg-gray-50 transition-colors">
+              <tr key={aff._key} className="border-t border-slate-100 transition-colors hover:bg-slate-50">
                 <td className="p-3 sm:p-4">
                   <select
                     value={aff.projet}
@@ -140,7 +140,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
                         e.target.value === "" ? "" : Number(e.target.value)
                       )
                     }
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field-control"
                   >
                     <option value="">-- Sélectionner --</option>
                     {projects.map((proj) => (
@@ -161,7 +161,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
                         e.target.value === "" ? "" : Number(e.target.value)
                       )
                     }
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field-control"
                     disabled={loadingRoles}
                   >
                     <option value="">-- Rôle --</option>
@@ -177,7 +177,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
                   <button
                     type="button"
                     onClick={() => removeRow(index)}
-                    className="inline-flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded transition-colors text-sm font-medium"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700 transition-colors hover:bg-red-100"
                   >
                     <Trash2 size={18} />
                     Supprimer
@@ -191,7 +191,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
 
       {error && (
         <p className="text-xs sm:text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3">
-          ⚠️ {error}
+          {error}
         </p>
       )}
 
@@ -199,7 +199,7 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
         <button
           type="button"
           onClick={addRow}
-          className="inline-flex items-center gap-2 bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium active:scale-95"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#243782] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#00133B] active:scale-95 sm:px-6 sm:py-2.5"
         >
           <Plus size={18} />
           Ajouter une affectation
@@ -210,3 +210,5 @@ const AffectationTable = ({ affectations, setAffectations, projects }) => {
 };
 
 export default AffectationTable;
+
+

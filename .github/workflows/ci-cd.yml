@@ -61,7 +61,7 @@ jobs:
       - name: Unit tests with coverage
         run: |
           python -m coverage erase
-          python -m coverage run manage.py test admin_config.tests
+          python -m coverage run manage.py test validation_core.tests
           python -m coverage xml -o coverage.xml
 
       - name: Upload backend coverage

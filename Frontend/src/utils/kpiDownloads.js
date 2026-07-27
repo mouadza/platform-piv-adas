@@ -117,9 +117,9 @@ export const getGammeDisplayName = (gamme) => {
 const NON_COTE_VALUES = [
   "Non_cote",
   "Non_coté",
-  "Non_cotÃ©",
-  "Non_cotÃƒÂ©",
-  "Non_cotÃƒÆ’Ã‚Â©",
+  "Non_cot\u00c3\u00a9",
+  "Non_cot\u00c3\u0192\u00c2\u00a9",
+  "Non_cot\u00c3\u0192\u00c6\u2019\u00c3\u201a\u00c2\u00a9",
 ];
 
 const normalizeCotation = (value) => {

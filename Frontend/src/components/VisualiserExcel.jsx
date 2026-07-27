@@ -26,7 +26,7 @@ const VisualiserExcel = () => {
   return (
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">Aperçu du fichier</h2>
-      <button onClick={() => navigate(-1)} className="mb-4 text-blue-600 underline">Retour</button>
+      <button onClick={() => navigate(-1)} className="mb-4 text-[#243782] underline">Retour</button>
       <div className="overflow-auto max-w-full border rounded-lg">
         <table className="min-w-full border-collapse">
           <tbody>
@@ -51,3 +51,4 @@ const VisualiserExcel = () => {
 };
 
 export default VisualiserExcel;
+

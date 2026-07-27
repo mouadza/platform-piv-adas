@@ -5,11 +5,11 @@ const HistoryModal = ({ historyModal, onClose }) => {
   if (!historyModal.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-[560px] max-h-[80vh] overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+    <div className="modal-backdrop">
+      <div className="modal-sheet sm:max-w-[560px]">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-extrabold text-slate-900">
               Historique des commentaires
             </h3>
             <p className="text-xs text-slate-500 font-mono">
@@ -19,13 +19,13 @@ const HistoryModal = ({ historyModal, onClose }) => {
 
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-900 font-bold"
+            className="rounded-lg px-2 py-1 font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           >
             ✕
           </button>
         </div>
 
-        <div className="p-5 overflow-y-auto max-h-[60vh]">
+        <div className="max-h-[68vh] overflow-y-auto p-5">
           {historyModal.loading && (
             <p className="text-sm text-slate-500">Chargement...</p>
           )}
@@ -40,7 +40,7 @@ const HistoryModal = ({ historyModal, onClose }) => {
             historyModal.items.map((item) => (
               <div
                 key={item.id}
-                className="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                className="mb-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-bold text-slate-800">

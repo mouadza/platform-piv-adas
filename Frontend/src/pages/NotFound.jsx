@@ -7,7 +7,7 @@ function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
       <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <p className="text-sm font-bold uppercase tracking-wide text-blue-600">
+        <p className="text-sm font-bold uppercase tracking-wide text-[#243782]">
           Page introuvable
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-950">
@@ -20,7 +20,7 @@ function NotFound() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#243782] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#00133B]"
         >
           <ArrowLeft size={16} />
           Retour
@@ -31,3 +31,4 @@ function NotFound() {
 }
 
 export default NotFound;
+

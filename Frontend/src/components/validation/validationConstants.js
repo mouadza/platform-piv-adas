@@ -16,11 +16,11 @@ export const ROW_BORDER = {
 
 export const COTATION = {
   A_coter: {
-    square: "#1C1C1C",
-    bg: "#F8F8F8",
-    text: "#1C1C1C",
-    border: "#AAAAAA",
-    label: "À coter",
+    square: "#111827",
+    bg: "#F8FAFC",
+    text: "#111827",
+    border: "#111827",
+    label: "A coter",
   },
   OK: {
     square: "#2E7D32",
@@ -44,10 +44,10 @@ export const COTATION = {
     label: "NOK",
   },
   Non_coté: {
-    square: "#9E9E9E",
-    bg: "#F5F5F5",
-    text: "#424242",
-    border: "#BDBDBD",
+    square: "#6B7280",
+    bg: "#F3F4F6",
+    text: "#374151",
+    border: "#D1D5DB",
     label: "Non coté",
   },
 };

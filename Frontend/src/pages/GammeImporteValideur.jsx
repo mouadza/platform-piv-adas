@@ -107,7 +107,7 @@ const GammeImporteValideur = () => {
 
   return (
     <DashboardLayout role="valideur">
-      <div className="p-8">
+      <div className="space-y-5">
         <div className="flex justify-between items-center mb-8">
           <button
             type="button"
@@ -118,7 +118,7 @@ const GammeImporteValideur = () => {
           </button>
 
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
               Gammes a valider
             </h1>
             <p className="text-sm text-slate-500 mt-1">
@@ -132,7 +132,7 @@ const GammeImporteValideur = () => {
 
         {loading && (
           <div className="flex justify-center items-center gap-3 py-10">
-            <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full" />
+            <div className="h-16 w-full animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
             <span className="text-slate-500 font-medium">Chargement...</span>
           </div>
         )}
@@ -144,7 +144,7 @@ const GammeImporteValideur = () => {
         )}
 
         {!loading && gammes.length === 0 && (
-          <div className="border border-dashed border-slate-300 rounded-2xl py-16 flex flex-col items-center justify-center bg-slate-50">
+          <div className="border border-dashed border-slate-300 rounded-lg py-16 flex flex-col items-center justify-center bg-slate-50">
             <span className="text-4xl mb-3">Dossier</span>
             <span className="text-slate-500 font-medium">
               Aucune gamme creee pour ce projet
@@ -157,13 +157,13 @@ const GammeImporteValideur = () => {
             {gammes.map((gamme) => (
               <div
                 key={gamme.id}
-                className="rounded-2xl border border-slate-200 shadow-sm hover:shadow-md bg-white transition-all overflow-hidden"
+                className="rounded-lg border border-slate-200 shadow-sm hover:shadow-md bg-white transition-all overflow-hidden"
               >
                 <div className="p-6 flex justify-between items-start gap-5">
                   <div className="flex items-start gap-4 min-w-0 flex-1">
                     <div className="min-w-0 flex-1">
                       <p
-                        className="text-lg font-bold text-blue-700 cursor-pointer hover:underline truncate"
+                        className="text-lg font-bold text-[#243782] cursor-pointer hover:underline truncate"
                         onClick={() => navigate(`/visualiser/${gamme.id}`)}
                       >
                         {getGammeName(gamme)}
@@ -200,7 +200,7 @@ const GammeImporteValideur = () => {
                           "Commentaires besoins techniques"
                         )
                       }
-                      className="bg-blue-100 text-blue-700 hover:bg-blue-200"
+                      className="bg-[#243782]/15 text-[#243782] hover:bg-[#243782]/20"
                     >
                       Besoins techniques
                     </GammeActionButton>
@@ -217,7 +217,7 @@ const GammeImporteValideur = () => {
                     <GammeActionButton
                       onClick={() => handleDownloadKPI(gamme)}
                       disabled={downloadingKPI[gamme.id]}
-                      className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="bg-[#243782]/15 text-[#243782] hover:bg-[#243782]/20 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <Download size={16} />
                       {downloadingKPI[gamme.id] ? "Chargement..." : "KPI"}
@@ -304,3 +304,6 @@ const GammeImporteValideur = () => {
 };
 
 export default GammeImporteValideur;
+
+
+
