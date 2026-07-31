@@ -1,7 +1,7 @@
 # Validation Platform
 
 Application de gestion et de validation des projets, gammes et résultats.
-Le backend utilise Django REST Framework, le frontend React, PostgreSQL pour
+Le backend utilise Django REST Framework, le frontend React, et PostgreSQL pour
 les données, ainsi que RabbitMQ et Redis pour les tâches Celery.
 
 ## 1. Configuration du fichier `.env`
